@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Guía OLED de Luka</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Silkscreen&display=swap">
+<style>
+/* Layout: banco de trabajo — hero con la OLED simulada, luego riel de pasos (sticky en escritorio) + columna de lectura */
+:root {
+  --bg: #f3f5f4;
+  --surface: #ffffff;
+  --ink: #17221f;
+  --muted: #586863;
+  --line: #d6dfdc;
+  --accent: #0d7a6a;        /* verde soldermask */
+  --accent-soft: #e0f1ed;
+  --amber: #b86b00;         /* checkpoint / pide confirmación */
+  --amber-soft: #fbf0dc;
+  --danger: #b3261e;
+  --code-bg: #14201d;
+  --code-ink: #d9efe8;
+  --oled-bg: #050807;
+  --oled-px: #9fe7ff;
+  --board: #1e3a34;
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --f-pixel: "Silkscreen", "JetBrains Mono", monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1614; --surface: #16201d; --ink: #e4ece9; --muted: #9db0aa; --line: #2a3834;
+    --accent: #4fc9b2; --accent-soft: #173a33; --amber: #f0b24a; --amber-soft: #3a2c12; --danger: #ff8a80;
+    --code-bg: #0a100e; --code-ink: #d9efe8; --oled-bg: #020403; --oled-px: #9fe7ff; --board: #12302a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1614; --surface: #16201d; --ink: #e4ece9; --muted: #9db0aa; --line: #2a3834;
+  --accent: #4fc9b2; --accent-soft: #173a33; --amber: #f0b24a; --amber-soft: #3a2c12; --danger: #ff8a80;
+  --code-bg: #0a100e; --code-ink: #d9efe8; --oled-bg: #020403; --oled-px: #9fe7ff; --board: #12302a;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--f-body); font-size: 1.0625rem; line-height: 1.6;
+  padding-inline: 16px; padding-block: 0 64px;
+}
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+code { font-family: var(--f-mono); font-size: .86em; background: var(--accent-soft); padding: .1em .35em; border-radius: 4px; overflow-wrap: anywhere; }
+strong { font-weight: 700; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; line-height: 1.15; margin: 0; }
+
+.wrap { max-width: 1120px; margin-inline: auto; }
+
+/* ---------- Hero ---------- */
+.hero {
+  display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 40px; align-items: center;
+  padding-block: 48px 40px; border-bottom: 1px solid var(--line);
+}
+.eyebrow { font-family: var(--f-mono); font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin: 0 0 14px; }
+.hero h1 { font-size: clamp(2rem, 4.6vw, 3.3rem); font-weight: 800; letter-spacing: -.02em; }
+.hero h1 em { font-style: normal; color: var(--accent); }
+.hero .lede { max-width: 58ch; color: var(--muted); margin: 18px 0 22px; font-size: 1.1rem; }
+.specs { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.specs li { font-family: var(--f-mono); font-size: .78rem; padding: 5px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); }
+
+.repo-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.btn-primary, .btn-ghost { font-weight: 700; font-size: .95rem; padding: 10px 16px; border-radius: 8px; text-decoration: none; border: 1.5px solid var(--accent); }
+.btn-primary { background: var(--accent); color: var(--surface); }
+.btn-ghost { color: var(--accent); background: transparent; }
+
+/* OLED board */
+.board {
+  background: var(--board); border-radius: 14px; padding: 22px 22px 16px; max-width: 100%;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.05), 0 18px 40px -22px rgba(0,0,0,.55);
+  position: relative;
+}
+.board::before, .board::after { content: ""; position: absolute; top: 10px; width: 9px; height: 9px; border-radius: 50%; background: #c9a85a; box-shadow: inset 0 0 0 2px #8d7334; }
+.board::before { left: 10px; } .board::after { right: 10px; }
+.oled {
+  background: var(--oled-bg); border-radius: 4px; aspect-ratio: 2 / 1; max-width: 100%;
+  padding: 6% 7%; display: flex; flex-direction: column; justify-content: center; gap: 6%;
+  font-family: var(--f-pixel); color: var(--oled-px); text-shadow: 0 0 6px rgba(159,231,255,.55);
+  font-size: clamp(.8rem, 2.1vw, 1.15rem); line-height: 1.1; border: 3px solid #0b0f0e;
+}
+.oled .big { font-size: 1.25em; }
+.pins { display: flex; justify-content: center; gap: 18px; margin-top: 12px; font-family: var(--f-mono); font-size: .7rem; color: #cfe3dd; letter-spacing: .06em; }
+.pins span::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 5px; border-radius: 1px; background: #c9a85a; vertical-align: middle; }
+.board-caption { color: #cfe3dd; font-family: var(--f-mono); font-size: .72rem; text-align: center; margin: 8px 0 0; opacity: .8; }
+
+/* ---------- Contract ---------- */
+.contract { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; padding-block: 36px; }
+.contract h2 { grid-column: 1 / -1; font-size: 1.5rem; }
+.rule { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; }
+.rule h3 { font-size: 1.02rem; margin-bottom: 6px; }
+.rule p { margin: 0; color: var(--muted); font-size: .97rem; }
+.rule.no h3 { color: var(--danger); }
+
+/* ---------- Steps layout ---------- */
+.steps-layout { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 40px; padding-top: 12px; }
+.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 20px); align-self: start; }
+.rail-title { font-family: var(--f-mono); font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+.rail ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; border-left: 2px solid var(--line); }
+.rail a {
+  display: flex; gap: 10px; align-items: baseline; padding: 6px 10px; margin-left: -2px; border-left: 2px solid transparent;
+  text-decoration: none; color: var(--muted); font-size: .93rem; line-height: 1.3;
+}
+.rail a:hover { color: var(--ink); }
+.rail a.active { color: var(--ink); border-left-color: var(--accent); font-weight: 700; }
+.rail a .n { font-family: var(--f-mono); font-size: .78rem; min-width: 1.4em; }
+.rail a.done .n { color: var(--accent); }
+.rail a.done .n::after { content: " ✓"; }
+.progress { margin-top: 16px; font-family: var(--f-mono); font-size: .78rem; color: var(--muted); }
+.bar { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; margin-top: 6px; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s ease; }
+
+.steps { display: grid; gap: 28px; min-width: 0; }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 26px 28px; min-width: 0; scroll-margin-top: 20px; }
+.step-head { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 14px; }
+.step-num {
+  flex: none; width: 44px; height: 44px; border-radius: 8px; display: grid; place-items: center;
+  font-family: var(--f-mono); font-weight: 600; font-size: 1.05rem; background: var(--accent-soft); color: var(--accent);
+}
+.step-head h2 { font-size: 1.45rem; padding-top: 7px; flex: 1; min-width: 0; }
+.step p { margin: 0 0 12px; max-width: 70ch; }
+.step ul, .step ol.inner { margin: 0 0 12px; padding-left: 1.2em; max-width: 70ch; }
+.step li { margin-bottom: 6px; }
+.note { color: var(--muted); font-size: .95rem; }
+.warn { border-left: 3px solid var(--danger); padding: 8px 14px; background: color-mix(in srgb, var(--danger) 8%, var(--surface)); border-radius: 0 6px 6px 0; margin: 0 0 12px; max-width: 70ch; }
+
+.checkpoint {
+  display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  margin-top: 18px; padding: 12px 16px; background: var(--amber-soft); border: 1px dashed var(--amber); border-radius: 8px;
+}
+.checkpoint .q { flex: 1 1 280px; min-width: 0; }
+.checkpoint .tag { font-family: var(--f-mono); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--amber); display: block; margin-bottom: 2px; }
+.done-btn {
+  font: inherit; font-size: .9rem; font-weight: 700; padding: 8px 14px; border-radius: 6px; cursor: pointer;
+  border: 1.5px solid var(--accent); background: transparent; color: var(--accent);
+}
+.done-btn[aria-pressed="true"] { background: var(--accent); color: var(--surface); }
+
+/* code */
+.code { position: relative; margin: 0 0 14px; }
+.code pre {
+  margin: 0; background: var(--code-bg); color: var(--code-ink); border-radius: 8px; padding: 16px 18px; overflow-x: auto;
+  font-family: var(--f-mono); font-size: .84rem; line-height: 1.55;
+}
+.code .lang { position: absolute; top: 8px; left: 14px; font-family: var(--f-mono); font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; color: #7fa59b; }
+.code pre { padding-top: 30px; }
+.copy {
+  position: absolute; top: 6px; right: 8px; font: 600 .72rem var(--f-mono); padding: 4px 9px; border-radius: 5px; cursor: pointer;
+  background: #24342f; color: #d9efe8; border: 1px solid #36504a;
+}
+.c-com { color: #7fa59b; }
+.c-kw { color: #ffb86b; }
+.c-str { color: #9fe7ff; }
+
+/* facts table */
+.facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 18px; margin: 0 0 14px; font-size: .95rem; }
+.facts dt { color: var(--muted); font-family: var(--f-mono); font-size: .8rem; padding-top: 3px; }
+.facts dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+
+/* wiring */
+.wiring { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 14px; padding: 0; list-style: none; }
+.wiring li { font-family: var(--f-mono); font-size: .82rem; padding: 6px 10px; border-radius: 6px; background: var(--bg); border: 1px solid var(--line); }
+.wiring b { color: var(--accent); }
+
+/* keys */
+kbd { font-family: var(--f-mono); font-size: .8em; padding: 2px 7px; border: 1px solid var(--line); border-bottom-width: 3px; border-radius: 5px; background: var(--bg); }
+
+/* debugger sim */
+.sim { border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; margin: 6px 0 16px; }
+.sim-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg); border-bottom: 1px solid var(--line); }
+.sim-status { font-family: var(--f-mono); font-size: .8rem; color: var(--amber); }
+.sim-btns { display: flex; gap: 8px; }
+.sim-btns button { font: 600 .8rem var(--f-mono); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.sim-btns button.primary { border-color: var(--accent); color: var(--accent); }
+.sim-btns button:disabled { opacity: .45; cursor: default; }
+.sim-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.sim-pane { padding: 14px; min-width: 0; }
+.sim-pane + .sim-pane { border-left: 1px solid var(--line); }
+.sim-pane h3 { font-family: var(--f-mono); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; font-weight: 600; }
+.vars { font-family: var(--f-mono); font-size: .82rem; margin: 0 0 14px; display: grid; gap: 3px; }
+.vars span b { color: var(--accent); font-weight: 600; }
+.vars .changed { background: var(--amber-soft); border-radius: 3px; }
+.sim .oled { font-size: clamp(.7rem, 1.6vw, .95rem); }
+.predict { font-size: .92rem; color: var(--muted); padding: 10px 14px; border-top: 1px solid var(--line); margin: 0; }
+
+/* diagnosis table */
+.section-title { font-size: 1.7rem; margin: 52px 0 6px; }
+.section-sub { color: var(--muted); margin: 0 0 18px; max-width: 65ch; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: .95rem; }
+th, td { text-align: left; vertical-align: top; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+th { font-family: var(--f-mono); font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; background: var(--bg); }
+tr:last-child td { border-bottom: 0; }
+td:first-child { width: 34%; font-weight: 700; }
+
+/* acceptance */
+.accept { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.accept label { display: flex; gap: 12px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; cursor: pointer; }
+.accept input { width: 20px; height: 20px; margin-top: 3px; accent-color: var(--accent); flex: none; }
+.accept input:checked + span { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--accent); }
+.closing { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 20px; }
+.closing .rule p { color: var(--ink); }
+
+.sources { margin-top: 52px; padding-top: 22px; border-top: 1px solid var(--line); color: var(--muted); font-size: .92rem; }
+.sources ul { padding-left: 1.2em; }
+
+@media (max-width: 900px) {
+  .hero { grid-template-columns: minmax(0, 1fr); gap: 28px; padding-block: 32px 28px; }
+  .contract, .closing { grid-template-columns: minmax(0, 1fr); }
+  .steps-layout { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .rail { position: static; }
+  .rail ol { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); border-left: 0; gap: 4px; }
+  .rail a { border: 1px solid var(--line); border-radius: 6px; margin-left: 0; }
+  .rail a.active { border-color: var(--accent); }
+}
+@media (max-width: 600px) {
+  .step { padding: 20px 18px; }
+  .step-head h2 { font-size: 1.25rem; padding-top: 9px; }
+  .sim-body { grid-template-columns: minmax(0, 1fr); }
+  .sim-pane + .sim-pane { border-left: 0; border-top: 1px solid var(--line); }
+  .facts { grid-template-columns: minmax(0, 1fr); gap: 0 0; }
+  .facts dd { margin-bottom: 8px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+html { scroll-behavior: smooth; }
+</style>
+
+<div class="wrap">
+
+<header class="hero">
+  <div>
+    <p class="eyebrow">Guía para la IA tutora · ESP32 + OLED en Wokwi</p>
+    <h1>Detener Python <em>remoto</em> y ver la OLED en el mismo instante</h1>
+    <p class="lede">Reproduce la demo de diagnóstico de Sergio: pausar MicroPython dentro del ESP32 simulado y observar juntos contador, pila de llamadas y pantalla. Confirmado con capturas el 16 de octubre de 2026: <code>oled_demo.py:29</code>, contador 1 y OLED «vuelta 1».</p>
+    <ul class="specs" aria-label="Equipo probado">
+      <li>Linux x86_64</li>
+      <li>VS Code 1.140</li>
+      <li>GHI MicroPython Debugger 0.2.2</li>
+      <li>pyserial 3.5</li>
+    </ul>
+    <div class="repo-cta">
+      <a class="btn-primary" href="https://github.com/Cassers/luka-wokwi-oled-debug">Archivos en GitHub</a>
+      <a class="btn-ghost" href="https://github.com/Cassers/luka-wokwi-oled-debug/archive/refs/heads/main.zip">Descargar ZIP</a>
+    </div>
+  </div>
+  <figure class="board" style="margin:0" aria-label="Pantalla OLED esperada en el breakpoint">
+    <div class="oled">
+      <div class="big">Demo OLED</div>
+      <div>Sergio: ESP32 OK</div>
+      <div>vuelta 1</div>
+    </div>
+    <div class="pins"><span>GND</span><span>VCC</span><span>SCL</span><span>SDA</span></div>
+    <figcaption class="board-caption">SSD1306 128×64 · lo que se ve al pausar en la línea 29</figcaption>
+  </figure>
+</header>
+
+<section class="contract" aria-labelledby="contrato">
+  <h2 id="contrato">Contrato del bot tutor</h2>
+  <div class="rule">
+    <h3>Un paso a la vez</h3>
+    <p>Explica en español, da un solo paso, pide el resultado y espera antes del siguiente. Ante un fallo, pide el mensaje completo y cambia una sola cosa por vez.</p>
+  </div>
+  <div class="rule">
+    <h3>Enseña con pistas</h3>
+    <p>Preguntas y pistas, no soluciones. No resuelve ejercicios ni exámenes, ni escribe lógica de robots sin permiso docente explícito. Esta demo diagnostica el entorno; no autoriza resolver el trabajo de Luka.</p>
+  </div>
+  <div class="rule no">
+    <h3>Nunca hardware real</h3>
+    <p>No flashear placas físicas, no tocar puertos USB, no instalar <code>machine</code> con pip. Para APIs nuevas verificar en Context7 <code>/micropython/micropython</code> o declarar la limitación.</p>
+  </div>
+</section>
+
+<div class="steps-layout">
+  <nav class="rail" aria-label="Pasos">
+    <p class="rail-title">Pasos</p>
+    <ol id="rail">
+      <li><a href="#paso-1"><span class="n">1</span>Inventariar</a></li>
+      <li><a href="#paso-2"><span class="n">2</span>Archivos y raíz</a></li>
+      <li><a href="#paso-3"><span class="n">3</span>Python del puente</a></li>
+      <li><a href="#paso-4"><span class="n">4</span>Extensión GHI</a></li>
+      <li><a href="#paso-5"><span class="n">5</span>Firmware GHI</a></li>
+      <li><a href="#paso-6"><span class="n">6</span>Parche local</a></li>
+      <li><a href="#paso-7"><span class="n">7</span>Iniciar Wokwi</a></li>
+      <li><a href="#paso-8"><span class="n">8</span>Perfil remoto</a></li>
+      <li><a href="#paso-9"><span class="n">9</span>Demostrar</a></li>
+    </ol>
+    <div class="progress"><span id="progress-label">0 de 9 confirmados</span><div class="bar"><i id="progress-bar"></i></div></div>
+  </nav>
+
+  <main class="steps">
+
+    <article class="step" id="paso-1">
+      <div class="step-head"><div class="step-num">1</div><h2>Inventariar antes de instalar</h2></div>
+      <p>Pregunta sistema operativo, arquitectura, versión de VS Code, shell, carpeta abierta y perfil activo de extensiones. Confirma si hay Python para el puente, extensión Wokwi y permiso para ejecutar tareas del proyecto.</p>
+      <p class="warn">El puente usa PTY de Linux y <code>/proc</code>. En Windows o macOS hace falta adaptarlo; no basta cambiar una ruta. Si el equipo no es Linux, documenta la diferencia y acuerda la adaptación antes de presentar el procedimiento como reproducible.</p>
+      <div class="checkpoint"><div class="q"><span class="tag">Pide confirmación</span>«¿Qué sistema y versión tienes, y qué carpeta está abierta?»</div><button class="done-btn" data-step="1" aria-pressed="false">Marcar confirmado</button></div>
+    </article>
+
+    <article class="step" id="paso-2">
+      <div class="step-head"><div class="step-num">2</div><h2>Transferir los archivos y abrir la raíz</h2></div>
+      <p>Los archivos están en el repositorio público <a href="https://github.com/Cassers/luka-wokwi-oled-debug">Cassers/luka-wokwi-oled-debug</a>. Clónalo y abre la carpeta en VS Code:</p>
+      <div class="code"><span class="lang">sh</span><button class="copy" type="button">Copiar</button><pre>git clone https://github.com/Cassers/luka-wokwi-oled-debug.git
+cd luka-wokwi-oled-debug
+code .</pre></div>
+      <p class="note">Sin git: <a href="https://github.com/Cassers/luka-wokwi-oled-debug/archive/refs/heads/main.zip">descarga el ZIP</a>, descomprímelo y abre la carpeta resultante. El repositorio no incluye <code>.venv/</code> ni <code>.tools/</code>: se preparan en los pasos 3 y 5.</p>
+      <p>Estructura relativa que debe quedar en la copia del estudiante:</p>
+      <div class="code"><span class="lang">estructura</span><pre>raíz-del-proyecto/
+├── .vscode/
+│   ├── launch.json
+│   └── tasks.json
+├── tools/wokwi_debug_bridge.py
+└── MicroPython-debug/
+    ├── main.py
+    ├── oled_demo.py
+    ├── ssd1306.py
+    ├── diagram.json
+    ├── wokwi.toml
+    └── README.md</pre></div>
+      <ul>
+        <li>Abre <strong>la raíz</strong> en VS Code, no solo <code>MicroPython-debug/</code>: tareas y perfiles usan <code>${workspaceFolder}</code>.</li>
+        <li>No copies el <code>.venv</code> del profesor; recréalo en el equipo destino. No supongas que <code>.tools/</code> viene de Git.</li>
+        <li><code>MicroPython/</code> es opcional como fallback normal; sus perfiles extra no hacen falta aquí.</li>
+        <li>Si la copia ya tiene configuraciones propias, intégralas sin sobrescribirlas a ciegas.</li>
+      </ul>
+      <div class="checkpoint"><div class="q"><span class="tag">Pide confirmación</span>Presencia de los archivos y carpeta raíz abierta.</div><button class="done-btn" data-step="2" aria-pressed="false">Marcar confirmado</button></div>
+    </article>
+
+    <article class="step" id="paso-3">
+      <div class="step-head"><div class="step-num">3</div><h2>Preparar Python del puente en Linux</h2></div>
+      <p>Desde la raíz, una vez confirmado que <code>python3</code> existe. Si <code>.venv</code> ya existe, inspecciónalo primero: usa el entorno correcto, sin recrearlo ni instalar globalmente a ciegas.</p>
+      <div class="code"><span class="lang">sh</span><button class="copy" type="button">Copiar</button><pre>python3 -m venv .venv
+.venv/bin/python -m pip install pyserial==3.5
+.venv/bin/python -m pip show pyserial</pre></div>
+      <p>Las dos tareas invocan <code>${workspaceFolder}/.venv/bin/python</code>; confirma que esa ruta existe. Python del PC ejecuta el puente; el programa OLED corre en el ESP32 virtual.</p>
+      <div class="checkpoint"><div class="q"><span class="tag">Pide confirmación</span>Entorno utilizable y pyserial 3.5 reconocido.</div><button class="done-btn" data-step="3" aria-pressed="false">Marcar confirmado</button></div>
+    </article>
+
+    <article class="step" id="paso-4">
+      <div class="step-head"><div class="step-num">4</div><h2>Instalar el adaptador correcto en la ventana correcta</h2></div>
+      <ul>
+        <li>En Extensiones de esa misma ventana y perfil, busca <code>@id:ghielectronics.micropython-debugger</code> e instala la <strong>0.2.2</strong>. Comprueba nombre, identificador, versión y que esté habilitada (ver <strong>Disable/Uninstall</strong> en la ficha) también para este workspace.</li>
+        <li>Comprueba que la extensión Wokwi (<code>Wokwi.wokwi-vscode</code>) pueda iniciar una simulación; resuelve la activación pendiente con la cuenta del estudiante.</li>
+        <li>El manifest declara <code>engines.vscode: ^1.85.0</code>, pero la prueba real fue en 1.140, no en todas las versiones compatibles.</li>
+        <li>El perfil usa <code>type: micropython</code>. No elegir debugpy, «Python Debugger» ni C++.</li>
+      </ul>
+      <p class="note">Instalar GHI en otra ventana o perfil no acredita que esté disponible aquí.</p>
+      <div class="checkpoint"><div class="q"><span class="tag">Pide confirmación</span>Identificador, versión y estado de la extensión en la ventana de trabajo.</div><button class="done-btn" data-step="4" aria-pressed="false">Marcar confirmado</button></div>
+    </article>
+
+    <article class="step" id="paso-5">
+      <div class="step-head"><div class="step-num">5</div><h2>Obtener el firmware GHI exacto para simulación</h2></div>
+      <p>Crea <code>.tools/ghi-debug/</code> y descarga desde la fuente oficial <a href="https://raw.githubusercontent.com/ghi-electronics/micropython-vsc-extension/main/docs/firmware/micropython-esp32-generic-uart0-v1.29.0-16-g201fc48cf9.bin">este archivo</a>, conservando su nombre.</p>
+      <dl class="facts">
+        <dt>Destino</dt><dd><code>.tools/ghi-debug/micropython-esp32-generic-uart0-v1.29.0-16-g201fc48cf9.bin</code></dd>
+        <dt>Variante</dt><dd>ESP32_GENERIC_UART0</dd>
+        <dt>Versión</dt><dd>1.29.0-16-g201fc48cf9</dd>
+        <dt>Tamaño</dt><dd style="font-variant-numeric: tabular-nums">1 829 024 bytes</dd>
+        <dt>MD5</dt><dd><code>0039EDD36E557B0BD1F5DB20CDF97502</code> · cotejar con el <a href="https://raw.githubusercontent.com/ghi-electronics/micropython-vsc-extension/main/docs/firmware/micropython_firmware.json">índice oficial</a></dd>
+      </dl>
+      <ul>
+        <li>Verifica tamaño y MD5 con las herramientas del SO; una descarga HTML no es firmware.</li>
+        <li><code>MicroPython-debug/wokwi.toml</code> ya apunta a ese archivo vía <code>../.tools/ghi-debug/</code> y usa RFC2217 en el puerto 4000.</li>
+        <li>El firmware normal 1.27 de <code>MicroPython/</code> queda separado; no lo sustituyas por el de GHI.</li>
+      </ul>
+      <p class="warn">Esto selecciona firmware del simulador: <strong>no flashear una placa física</strong>. GDB y su puerto 3333 no intervienen.</p>
+      <div class="checkpoint"><div class="q"><span class="tag">Pide confirmación</span>Ruta, tamaño y checksum coincidentes.</div><button class="done-btn" data-step="5" aria-pressed="false">Marcar confirmado</button></div>
+    </article>
+
+    <article class="step" id="paso-6">
+      <div class="step-head"><div class="step-num">6</div><h2>Aplicar el ajuste local de GHI 0.2.2</h2></div>
+      <p>Copiar el repositorio <strong>no</strong> aplica este parche: modifica un archivo de la extensión instalada en el equipo destino.</p>
+      <ol class="inner">
+        <li>Detén la depuración. Localiza la instalación activa de GHI 0.2.2 (en Linux suele estar en <code>~/.vscode/extensions/ghielectronics.micropython-debugger-0.2.2/</code>), sin reutilizar la ruta del profesor.</li>
+        <li>Guarda una copia intacta de <code>out/debugSession.js</code> en <code>.tools/ghi-debug/debugSession.original.js</code>. No sobrescribas un backup existente sin revisarlo.</li>
+        <li>Si ya contiene el bucle de tres intentos, compruébalo y <strong>no lo reapliques</strong>. Si la versión difiere, revisa primero: nada de sustituciones ciegas.</li>
+        <li>Dentro de <code>launchUart</code>, tras <code>await this.link.open(port, baud);</code> y <code>this.attachEvents();</code>, sustituye solo la llamada siguiente <code>await this.link.conditions(4 /* Cond.Attached */, 0);</code> por este bloque:</li>
+      </ol>
+      <div class="code"><span class="lang">js · out/debugSession.js</span><button class="copy" type="button">Copiar</button><pre><span class="c-com">        // Wokwi can finish booting after UART has already been reopened.
+        // A frame sent too early is lost; retry attachment within a bounded window.</span>
+        <span class="c-kw">let</span> uartAttached = <span class="c-kw">false</span>;
+        <span class="c-kw">for</span> (<span class="c-kw">let</span> attempt = 1; attempt &lt;= 3; attempt++) {
+            <span class="c-kw">try</span> {
+                <span class="c-kw">await</span> this.link.conditions(4 <span class="c-com">/* Cond.Attached */</span>, 0);
+                uartAttached = <span class="c-kw">true</span>;
+                <span class="c-kw">break</span>;
+            }
+            <span class="c-kw">catch</span> (err) {
+                <span class="c-kw">if</span> (attempt === 3) {
+                    <span class="c-kw">throw</span> err;
+                }
+                this.log(<span class="c-str">`UART still booting; retrying attachment (${attempt}/3)...`</span>);
+                <span class="c-kw">await</span> delay(250);
+            }
+        }
+        <span class="c-kw">if</span> (!uartAttached) {
+            <span class="c-kw">throw new</span> Error(<span class="c-str">"UART did not become ready after reboot"</span>);
+        }</pre></div>
+      <ul>
+        <li>El bloque va tras <code>this.attachEvents()</code> y antes de <code>this.link.capabilities()</code>; no cambies otras llamadas de conexión.</li>
+        <li>Hasta tres intentos, 250 ms entre fallos; cada petición conserva el timeout de 5 s de <code>DeviceLink.request</code>.</li>
+        <li>Actualizar o reinstalar la extensión puede pisar el parche. El backup es local y tampoco viene con Git.</li>
+        <li>Ejecuta <strong>Developer: Reload Window</strong> después de guardar y <strong>antes</strong> de iniciar la simulación.</li>
+      </ul>
+      <div class="checkpoint"><div class="q"><span class="tag">Pide confirmación</span>Versión, backup, bloque localizado y ventana recargada.</div><button class="done-btn" data-step="6" aria-pressed="false">Marcar confirmado</button></div>
+    </article>
+
+    <article class="step" id="paso-7">
+      <div class="step-head"><div class="step-num">7</div><h2>Iniciar Wokwi desde su panel</h2></div>
+      <ol class="inner">
+        <li>Cierra depuraciones anteriores, conexiones <code>mpremote</code> y cualquier puente iniciado a mano.</li>
+        <li>En el icono lateral de Wokwi: <strong>Select Config File</strong> → <code>MicroPython-debug/wokwi.toml</code>.</li>
+        <li>Pulsa <strong>Start Simulation</strong>, no <strong>Start with Debugger</strong> (ese es el flujo GDB).</li>
+        <li>Mantén el simulador visible y sin pausar: una pestaña oculta puede pausar Wokwi.</li>
+      </ol>
+      <p>Montaje: DevKit C V4 + OLED SSD1306.</p>
+      <ul class="wiring" aria-label="Cableado">
+        <li>GND → <b>GND.1</b></li>
+        <li>VCC → <b>3V3</b></li>
+        <li>SDA → <b>21</b></li>
+        <li>SCL → <b>22</b></li>
+      </ul>
+      <p class="note">La pantalla puede estar negra antes de ejecutar <code>show()</code>; eso no indica una avería.</p>
+      <div class="checkpoint"><div class="q"><span class="tag">Pide confirmación</span>Configuración seleccionada y montaje visible.</div><button class="done-btn" data-step="7" aria-pressed="false">Marcar confirmado</button></div>
+    </article>
+
+    <article class="step" id="paso-8">
+      <div class="step-head"><div class="step-num">8</div><h2>Lanzar el perfil OLED remoto y esperar el puente</h2></div>
+      <ul>
+        <li>Abre <code>MicroPython-debug/oled_demo.py</code> y pon un breakpoint en la <strong>línea 29</strong>, el <code>print</code> posterior a <code>mostrar_contador</code>.</li>
+        <li>En <strong>Ejecutar y depurar</strong>, selecciona <strong>OLED — depuración REMOTA GHI (no Python del PC)</strong> y pulsa el triángulo de ese panel, junto al selector. No uses «Depurar archivo Python» del editor.</li>
+        <li>El perfil lanza solo las tareas: puente con <code>--ensure --recover-stale</code> y validación <code>--check</code>. Espera <strong>Puente activo.</strong> y la comprobación de PID, PTY y propietario. Deja abierta la terminal de la tarea.</li>
+        <li>No lances otro puente manual ni <code>mpremote</code>: GHI transfiere la demo y el controlador con <code>sync: true</code>.</li>
+        <li>El perfil usa UART a 115200 y <code>.tools/wokwi-ghi-uart</code>; que el enlace exista no demuestra que el puente esté vivo.</li>
+        <li>Un reintento <strong>(1/3)</strong> puede ser normal durante el arranque; espera el resultado final.</li>
+      </ul>
+      <div class="checkpoint"><div class="q"><span class="tag">Pide confirmación</span>Tareas aprobadas y estado del depurador. Si aparece <strong>Paused on entry</strong>, pulsa <kbd>F5</kbd> para continuar.</div><button class="done-btn" data-step="8" aria-pressed="false">Marcar confirmado</button></div>
+    </article>
+
+    <article class="step" id="paso-9">
+      <div class="step-head"><div class="step-num">9</div><h2>Demostrar la conexión y avanzar</h2></div>
+      <p>Confirmad juntos: <strong>Paused on breakpoint</strong>, línea 29, Variables y OLED actualizada. La pausa ocurre <em>después</em> de <code>show()</code>. GHI mapea <code>oled_demo.py</code> local al <code>main.py</code> remoto, así que ese nombre en el registro es esperable.</p>
+
+      <div class="sim" aria-label="Simulación del estado esperado del depurador">
+        <div class="sim-bar">
+          <span class="sim-status" id="sim-status">⏸ Paused on breakpoint · oled_demo.py:29</span>
+          <div class="sim-btns">
+            <button type="button" class="primary" id="sim-f5">F5 Continuar</button>
+            <button type="button" id="sim-reset">Reiniciar</button>
+          </div>
+        </div>
+        <div class="sim-body">
+          <div class="sim-pane">
+            <h3>Variables locales</h3>
+            <div class="vars">
+              <span id="v-contador"><b>contador</b> = 1</span>
+              <span id="v-iter"><b>_</b> = 0</span>
+              <span><b>display</b> = &lt;SSD1306_I2C&gt;</span>
+            </div>
+            <h3>Pila de llamadas</h3>
+            <div class="vars">
+              <span><b>ejecutar_demo</b> · línea 29</span>
+              <span><b>&lt;module&gt;</b> · línea 33</span>
+            </div>
+          </div>
+          <div class="sim-pane">
+            <h3>OLED</h3>
+            <div class="oled">
+              <div class="big">Demo OLED</div>
+              <div>Sergio: ESP32 OK</div>
+              <div id="sim-vuelta">vuelta 1</div>
+            </div>
+          </div>
+        </div>
+        <p class="predict" id="sim-predict">Antes de pulsar F5, pide a Luka que prediga el siguiente valor de <code>contador</code>.</p>
+      </div>
+
+      <ul>
+        <li><kbd>F5</kbd> continúa al siguiente breakpoint · <kbd>F10</kbd> avanza por líneas sin entrar en llamadas · <kbd>F11</kbd> entra en una función.</li>
+        <li>Antes de continuar, pide predecir el siguiente contador; después comparad pantalla y variables. La demo tiene tres vueltas, sin <code>sleep</code>.</li>
+      </ul>
+      <p class="note">Ver Variables no basta: la combinación de adaptador remoto, pila y pantalla es lo que distingue este éxito de un depurador local.</p>
+      <div class="checkpoint"><div class="q"><span class="tag">Pide confirmación</span>Pausa remota, locales, pila y OLED coinciden; F5 alcanza la vuelta siguiente.</div><button class="done-btn" data-step="9" aria-pressed="false">Marcar confirmado</button></div>
+    </article>
+
+  </main>
+</div>
+
+<h2 class="section-title" id="diagnostico">Diagnóstico dirigido</h2>
+<p class="section-sub">Síntomas frecuentes y qué debe hacer la IA tutora en cada caso.</p>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Síntoma</th><th>Acción de la IA</th></tr></thead>
+    <tbody>
+      <tr><td><code>debugpy/launcher</code> o error de <code>machine</code> en el PC</td><td>Se está ejecutando CPython local. Detener y seleccionar el perfil remoto del panel. No <code>pip install machine</code>.</td></tr>
+      <tr><td>Tipo <code>micropython</code> no reconocido</td><td>Revisar GHI en esta ventana y perfil, y recargar. No sustituirlo por un adaptador Python o C++.</td></tr>
+      <tr><td>Falla <code>preLaunchTask</code></td><td>No elegir <strong>Debug Anyway</strong>. Leer la terminal de tareas y corregir antes de lanzar.</td></tr>
+      <tr><td>PTY obsoleto o enlace existente</td><td><code>--check</code> verifica el propietario; <code>--recover-stale</code> solo recupera restos propios documentados de un PID inexistente. No abrir ni borrar PTY o enlaces ajenos.</td></tr>
+      <tr><td><code>Lost connection to the board</code></td><td>Aviso genérico, no prueba de fallo USB. Revisar Debug Console, firmware, parche, puente y simulación visible.</td></tr>
+      <tr><td>Pantalla negra o imagen anterior</td><td>Si aún no pasó <code>show()</code>, es normal. Comprobar el breakpoint 29 antes de tocar el cableado.</td></tr>
+      <tr><td>Breakpoint de nivel superior no se detiene</td><td>GHI tiene limitaciones de pausa en código de módulo; usar las funciones de la demo proporcionada.</td></tr>
+      <tr><td>Detener/iniciar Wokwi o recargar la ventana</td><td>Terminar la sesión y la tarea del puente anterior y relanzar el perfil para crear y validar el enlace. No asumir persistencia.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 class="section-title" id="aceptacion">Aceptación</h2>
+<p class="section-sub">La sesión está completa cuando todo esto se cumple en el equipo de Luka.</p>
+<ul class="accept">
+  <li><label><input type="checkbox" id="acc-1"><span>Versiones, archivos, firmware y checksum registrados en el equipo destino.</span></label></li>
+  <li><label><input type="checkbox" id="acc-2"><span>Parche local revisado, backup conservado y ventana recargada.</span></label></li>
+  <li><label><input type="checkbox" id="acc-3"><span>Inicio normal de Wokwi; tareas automáticas y comprobación del puente aprobadas.</span></label></li>
+  <li><label><input type="checkbox" id="acc-4"><span>Pausa remota en línea 29; locales, pila y «vuelta 1» coinciden; F5 alcanza la siguiente vuelta.</span></label></li>
+  <li><label><input type="checkbox" id="acc-5"><span>Luka explica por qué <code>show()</code> precede al breakpoint y por qué Python del PC no maneja esta OLED.</span></label></li>
+</ul>
+
+<div class="closing">
+  <div class="rule"><h3>Al terminar</h3><p>Detén la depuración y la tarea del puente antes de detener Wokwi. El almacenamiento simulado es volátil; GHI resincroniza al lanzar.</p></div>
+  <div class="rule"><h3>Fallback opcional</h3><p>Seleccionar <code>MicroPython/wokwi.toml</code> y seguir la guía normal (<code>MicroPython/GUIA-AGENTE-LUKA.md</code>, no incluida en el repositorio; pedirla al profesor) con su firmware y carga <code>mpremote</code>, después de liberar el puente.</p></div>
+  <div class="rule"><h3>Cómo sigue</h3><p>La enseñanza continúa por pistas: funciones, variables, bucles y predicción. Este éxito no autoriza generar lógica de robots.</p></div>
+</div>
+
+<footer class="sources">
+  <strong>Fuentes y alcance</strong>
+  <ul>
+    <li>En el repositorio: <a href="https://github.com/Cassers/luka-wokwi-oled-debug/blob/main/MicroPython-debug/README.md">README de la demo</a> (evidencia del 16/10/2026), <a href="https://github.com/Cassers/luka-wokwi-oled-debug/blob/main/.vscode/launch.json">perfiles</a>, <a href="https://github.com/Cassers/luka-wokwi-oled-debug/blob/main/.vscode/tasks.json">tareas</a> y <a href="https://github.com/Cassers/luka-wokwi-oled-debug/blob/main/tools/wokwi_debug_bridge.py">puente</a>.</li>
+    <li><a href="https://github.com/ghi-electronics/micropython-vsc-extension">GHI: documentación y código oficiales</a> · <a href="https://raw.githubusercontent.com/ghi-electronics/micropython-vsc-extension/main/docs/firmware/micropython_firmware.json">índice oficial de firmware</a>.</li>
+    <li><a href="https://docs.wokwi.com/vscode/project-config">Wokwi: configuración y RFC2217</a>.</li>
+    <li>La combinación GHI + Wokwi es experimental y requiere un parche local; no es una garantía oficial de GHI ni cubre otros SO o versiones. El comentario de <code>oled_demo.py</code> que dice «aún no confirmada» es anterior al éxito registrado.</li>
+  </ul>
+</footer>
+
+</div>
+
+<script>
+(function () {
+  var KEY = "luka-guia-oled-v1";
+  var state = { steps: {}, acc: {} };
+  try { var raw = localStorage.getItem(KEY); if (raw) state = Object.assign(state, JSON.parse(raw)); } catch (e) {}
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+  var railLinks = Array.prototype.slice.call(document.querySelectorAll("#rail a"));
+  function renderProgress() {
+    var n = 0;
+    document.querySelectorAll(".done-btn").forEach(function (b) {
+      var on = !!state.steps[b.dataset.step];
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+      b.textContent = on ? "Confirmado ✓" : "Marcar confirmado";
+      railLinks[b.dataset.step - 1].classList.toggle("done", on);
+      if (on) n++;
+    });
+    document.getElementById("progress-label").textContent = n + " de 9 confirmados";
+    document.getElementById("progress-bar").style.width = (n / 9 * 100) + "%";
+  }
+  document.querySelectorAll(".done-btn").forEach(function (b) {
+    b.addEventListener("click", function () { state.steps[b.dataset.step] = !state.steps[b.dataset.step]; save(); renderProgress(); });
+  });
+  renderProgress();
+
+  document.querySelectorAll(".accept input").forEach(function (cb) {
+    cb.checked = !!state.acc[cb.id];
+    cb.addEventListener("change", function () { state.acc[cb.id] = cb.checked; save(); });
+  });
+
+  // active step in rail
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) {
+          railLinks.forEach(function (a) { a.classList.toggle("active", a.getAttribute("href") === "#" + en.target.id); });
+        }
+      });
+    }, { rootMargin: "-30% 0px -60% 0px" });
+    document.querySelectorAll(".step").forEach(function (s) { io.observe(s); });
+  }
+
+  // copy buttons
+  document.querySelectorAll(".copy").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var pre = btn.parentNode.querySelector("pre");
+      var text = pre.innerText;
+      function done(msg) { btn.textContent = msg; setTimeout(function () { btn.textContent = "Copiar"; }, 1600); }
+      function fallback() {
+        var r = document.createRange(); r.selectNodeContents(pre);
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        done("Seleccionado");
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { done("Copiado"); }, fallback);
+      } else { fallback(); }
+    });
+  });
+
+  // debugger sim: 3 vueltas
+  var vuelta = 1;
+  var f5 = document.getElementById("sim-f5");
+  function renderSim(changed) {
+    var vc = document.getElementById("v-contador"), vi = document.getElementById("v-iter");
+    var status = document.getElementById("sim-status"), predict = document.getElementById("sim-predict");
+    if (vuelta <= 3) {
+      vc.innerHTML = "<b>contador</b> = " + vuelta;
+      vi.innerHTML = "<b>_</b> = " + (vuelta - 1);
+      document.getElementById("sim-vuelta").textContent = "vuelta " + vuelta;
+      status.textContent = "⏸ Paused on breakpoint · oled_demo.py:29";
+      predict.innerHTML = vuelta < 3
+        ? "Antes de pulsar F5, pide a Luka que prediga el siguiente valor de <code>contador</code>."
+        : "Última vuelta. ¿Qué pasará al pulsar F5 otra vez?";
+      f5.disabled = false;
+    } else {
+      status.textContent = "■ Programa terminado · tres vueltas completadas";
+      predict.innerHTML = "La OLED conserva «vuelta 3»: no hay más <code>show()</code> después del bucle.";
+      f5.disabled = true;
+    }
+    [vc, vi].forEach(function (el) { el.classList.toggle("changed", !!changed); });
+  }
+  f5.addEventListener("click", function () { vuelta++; renderSim(true); });
+  document.getElementById("sim-reset").addEventListener("click", function () { vuelta = 1; renderSim(false); });
+})();
+</script>
+
+</body>
+</html>

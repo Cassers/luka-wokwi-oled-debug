@@ -1,0 +1,40 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Wokwi GHI: iniciar puente",
+            "type": "process",
+            "command": "${workspaceFolder}/.venv/bin/python",
+            "args": ["-B", "${workspaceFolder}/tools/wokwi_debug_bridge.py", "--ensure", "--recover-stale"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "isBackground": true,
+            "runOptions": { "instanceLimit": 1 },
+            "problemMatcher": {
+                "owner": "wokwi-ghi-bridge",
+                "pattern": {
+                    "regexp": "^(?!)()()$",
+                    "kind": "file",
+                    "file": 1,
+                    "message": 2
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^GHI debugPort:",
+                    "endsPattern": "^Puente activo\\."
+                }
+            },
+            "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
+        },
+        {
+            "label": "Wokwi GHI: comprobar puente activo",
+            "dependsOn": "Wokwi GHI: iniciar puente",
+            "dependsOrder": "sequence",
+            "type": "process",
+            "command": "${workspaceFolder}/.venv/bin/python",
+            "args": ["-B", "${workspaceFolder}/tools/wokwi_debug_bridge.py", "--check"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": [],
+            "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
+        }
+    ]
+}

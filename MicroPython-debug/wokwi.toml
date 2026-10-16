@@ -1,0 +1,6 @@
+# Prueba experimental GHI: iniciar con Start Simulation, NO con GDB.
+# El firmware de MicroPython/ se conserva para volver al flujo normal.
+[wokwi]
+version = 1
+firmware = "../.tools/ghi-debug/micropython-esp32-generic-uart0-v1.29.0-16-g201fc48cf9.bin"
+rfc2217ServerPort = 4000
