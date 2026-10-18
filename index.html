@@ -28,6 +28,8 @@
   --oled-bg: #050807;
   --oled-px: #9fe7ff;
   --board: #1e3a34;
+  --board-ink: #cfe3dd;
+  --w-vcc: #d1342b; --w-gnd: #1f2523; --w-sda: #1f9a4b; --w-scl: #2f6fd6;
   --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   --f-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
   --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -38,14 +40,14 @@
   :root:not([data-theme="light"]) {
     --bg: #0f1614; --surface: #16201d; --ink: #e4ece9; --muted: #9db0aa; --line: #2a3834;
     --accent: #4fc9b2; --accent-soft: #173a33; --amber: #f0b24a; --amber-soft: #3a2c12; --danger: #ff8a80;
-    --code-bg: #0a100e; --code-ink: #d9efe8; --oled-bg: #020403; --oled-px: #9fe7ff; --board: #12302a;
+    --code-bg: #0a100e; --code-ink: #d9efe8; --oled-bg: #020403; --oled-px: #9fe7ff; --board: #12302a; --w-vcc: #ff6b5e; --w-gnd: #c9d2cf; --w-sda: #4cd27e; --w-scl: #6aa2ff;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0f1614; --surface: #16201d; --ink: #e4ece9; --muted: #9db0aa; --line: #2a3834;
   --accent: #4fc9b2; --accent-soft: #173a33; --amber: #f0b24a; --amber-soft: #3a2c12; --danger: #ff8a80;
-  --code-bg: #0a100e; --code-ink: #d9efe8; --oled-bg: #020403; --oled-px: #9fe7ff; --board: #12302a;
+  --code-bg: #0a100e; --code-ink: #d9efe8; --oled-bg: #020403; --oled-px: #9fe7ff; --board: #12302a; --w-vcc: #ff6b5e; --w-gnd: #c9d2cf; --w-sda: #4cd27e; --w-scl: #6aa2ff;
   color-scheme: dark;
 }
 
@@ -106,6 +108,44 @@ h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; line-height: 1.1
 .rule h3 { font-size: 1.02rem; margin-bottom: 6px; }
 .rule p { margin: 0; color: var(--muted); font-size: .97rem; }
 .rule.no h3 { color: var(--danger); }
+
+/* ---------- Pines ---------- */
+.pins-sec { padding-block: 36px 44px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-bottom: 36px; }
+.pins-sec > h2 { font-size: 1.7rem; margin-bottom: 10px; }
+.pins-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 24px; align-items: start; margin-top: 8px; }
+.diagram { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; min-width: 0; }
+.diagram-scroll { overflow-x: auto; }
+.diagram svg { display: block; width: 100%; min-width: 480px; height: auto; }
+.diagram figcaption { color: var(--muted); font-size: .88rem; margin-top: 8px; }
+.diagram .pcb { fill: var(--board); }
+.diagram .screen { fill: var(--oled-bg); }
+.diagram .chip { fill: #2c3b37; stroke: #4c625c; }
+.diagram .usb { fill: #9aa7a3; }
+.diagram .px { font-family: var(--f-pixel); font-size: 13px; fill: var(--oled-px); }
+.diagram .lbl { font-family: var(--f-mono); font-size: 14px; font-weight: 600; fill: var(--board-ink); }
+.diagram .lbl-sm { font-family: var(--f-mono); font-size: 11px; fill: var(--board-ink); }
+.diagram .pin { fill: #c9a85a; }
+.diagram .pin-label.used { font-weight: 700; fill: #ffffff; }
+.diagram .w { stroke-width: 4.5; }
+.diagram .gap { stroke: var(--surface); stroke-width: 10; }
+.w-vcc { stroke: var(--w-vcc); } .w-gnd { stroke: var(--w-gnd); } .w-sda { stroke: var(--w-sda); } .w-scl { stroke: var(--w-scl); }
+.d-vcc { fill: var(--w-vcc); } .d-gnd { fill: var(--w-gnd); } .d-sda { fill: var(--w-sda); } .d-scl { fill: var(--w-scl); }
+.wire-cards { display: grid; gap: 12px; min-width: 0; }
+.wire { display: flex; gap: 14px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; }
+.wire h3 { font-size: 1.05rem; margin-bottom: 4px; }
+.wire h3 small { font-family: var(--f-mono); font-size: .72rem; font-weight: 400; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-left: 6px; }
+.wire p { margin: 0; color: var(--muted); font-size: .96rem; }
+.sw { flex: none; width: 10px; align-self: stretch; border-radius: 4px; }
+.sw-vcc { background: var(--w-vcc); } .sw-gnd { background: var(--w-gnd); } .sw-sda { background: var(--w-sda); } .sw-scl { background: var(--w-scl); }
+.pins-explain { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 24px; }
+.sub-h { font-size: 1.2rem; margin: 30px 0 6px; }
+.hl { border-radius: 3px; padding: 0 3px; color: #0b1412; font-weight: 600; }
+.hl-scl { background: #6aa2ff; } .hl-sda { background: #4cd27e; }
+.quiz { display: grid; gap: 10px; margin-bottom: 14px; }
+.quiz details { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; }
+.quiz summary { cursor: pointer; font-weight: 700; }
+.quiz details p { margin: 10px 0 0; color: var(--muted); }
+@media (max-width: 900px) { .pins-grid, .pins-explain { grid-template-columns: minmax(0, 1fr); } }
 
 /* ---------- Steps layout ---------- */
 .steps-layout { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 40px; padding-top: 12px; }
@@ -256,6 +296,7 @@ html { scroll-behavior: smooth; }
     <div class="repo-cta">
       <a class="btn-primary" href="https://github.com/Cassers/luka-wokwi-oled-debug">Archivos en GitHub</a>
       <a class="btn-ghost" href="https://github.com/Cassers/luka-wokwi-oled-debug/archive/refs/heads/main.zip">Descargar ZIP</a>
+      <a class="btn-ghost" href="#pines">Cómo funcionan los pines</a>
     </div>
   </div>
   <figure class="board" style="margin:0" aria-label="Pantalla OLED esperada en el breakpoint">
@@ -283,6 +324,96 @@ html { scroll-behavior: smooth; }
     <h3>Nunca hardware real</h3>
     <p>No flashear placas físicas, no tocar puertos USB, no instalar <code>machine</code> con pip. Para APIs nuevas verificar en Context7 <code>/micropython/micropython</code> o declarar la limitación.</p>
   </div>
+</section>
+
+<section class="pins-sec" id="pines" aria-labelledby="pines-t">
+  <p class="eyebrow">Antes de empezar</p>
+  <h2 id="pines-t">Pines y conexiones, explicado fácil</h2>
+  <p class="section-sub">Un <strong>pin</strong> es una patita metálica de la placa. Cada una tiene una etiqueta impresa (<code>3V3</code>, <code>GND</code>, <code>21</code>…) y un trabajo. Conectar es unir con un cable el pin de un aparato con el pin correcto del otro. En nuestro montaje bastan <strong>4 cables</strong> entre el ESP32 y la pantalla OLED.</p>
+
+  <div class="pins-grid">
+    <figure class="diagram">
+      <div class="diagram-scroll">
+      <svg viewBox="0 0 680 410" role="img" aria-labelledby="dg-t dg-d">
+        <title id="dg-t">Cableado ESP32 DevKit C V4 con OLED SSD1306</title>
+        <desc id="dg-d">VCC de la OLED al pin 3V3, GND al GND del lado izquierdo, SCL al pin 22 y SDA al pin 21.</desc>
+        <rect x="30" y="60" width="200" height="150" rx="8" class="pcb"/>
+        <rect x="48" y="96" width="164" height="90" rx="3" class="screen"/>
+        <text x="130" y="138" class="px" text-anchor="middle">Demo OLED</text>
+        <text x="130" y="160" class="px" text-anchor="middle">vuelta 1</text>
+        <text x="130" y="203" class="lbl-sm" text-anchor="middle">SSD1306 · 0x3C</text>
+        <g class="lbl-sm" text-anchor="middle">
+          <text x="80" y="84">GND</text><text x="120" y="84">VCC</text><text x="160" y="84">SCL</text><text x="200" y="84">SDA</text>
+        </g>
+        <rect x="380" y="30" width="220" height="370" rx="10" class="pcb"/>
+        <rect x="440" y="150" width="100" height="120" rx="4" class="chip"/>
+        <text x="490" y="208" class="lbl" text-anchor="middle">ESP32</text>
+        <text x="490" y="226" class="lbl-sm" text-anchor="middle">DevKit C V4</text>
+        <rect x="465" y="374" width="50" height="22" rx="3" class="usb"/>
+        <text x="490" y="366" class="lbl-sm" text-anchor="middle">USB</text>
+        <g><circle cx="392" cy="60" r="5" class="pin"/><text x="404" y="64" class="lbl-sm pin-label used">3V3</text><circle cx="392" cy="84" r="5" class="pin"/><text x="404" y="88" class="lbl-sm pin-label">EN</text><circle cx="392" cy="108" r="5" class="pin"/><text x="404" y="112" class="lbl-sm pin-label">VP</text><circle cx="392" cy="132" r="5" class="pin"/><text x="404" y="136" class="lbl-sm pin-label">VN</text><circle cx="392" cy="156" r="5" class="pin"/><text x="404" y="160" class="lbl-sm pin-label">34</text><circle cx="392" cy="180" r="5" class="pin"/><text x="404" y="184" class="lbl-sm pin-label">35</text><circle cx="392" cy="204" r="5" class="pin"/><text x="404" y="208" class="lbl-sm pin-label">32</text><circle cx="392" cy="228" r="5" class="pin"/><text x="404" y="232" class="lbl-sm pin-label">33</text><circle cx="392" cy="252" r="5" class="pin"/><text x="404" y="256" class="lbl-sm pin-label">25</text><circle cx="392" cy="276" r="5" class="pin"/><text x="404" y="280" class="lbl-sm pin-label">26</text><circle cx="392" cy="300" r="5" class="pin"/><text x="404" y="304" class="lbl-sm pin-label">27</text><circle cx="392" cy="324" r="5" class="pin"/><text x="404" y="328" class="lbl-sm pin-label">14</text><circle cx="392" cy="348" r="5" class="pin"/><text x="404" y="352" class="lbl-sm pin-label">12</text><circle cx="392" cy="372" r="5" class="pin"/><text x="404" y="376" class="lbl-sm pin-label used">GND</text><circle cx="588" cy="60" r="5" class="pin"/><text x="576" y="64" text-anchor="end" class="lbl-sm pin-label">GND</text><circle cx="588" cy="84" r="5" class="pin"/><text x="576" y="88" text-anchor="end" class="lbl-sm pin-label">23</text><circle cx="588" cy="108" r="5" class="pin"/><text x="576" y="112" text-anchor="end" class="lbl-sm pin-label used">22</text><circle cx="588" cy="132" r="5" class="pin"/><text x="576" y="136" text-anchor="end" class="lbl-sm pin-label">TX</text><circle cx="588" cy="156" r="5" class="pin"/><text x="576" y="160" text-anchor="end" class="lbl-sm pin-label">RX</text><circle cx="588" cy="180" r="5" class="pin"/><text x="576" y="184" text-anchor="end" class="lbl-sm pin-label used">21</text><circle cx="588" cy="204" r="5" class="pin"/><text x="576" y="208" text-anchor="end" class="lbl-sm pin-label">GND</text><circle cx="588" cy="228" r="5" class="pin"/><text x="576" y="232" text-anchor="end" class="lbl-sm pin-label">19</text><circle cx="588" cy="252" r="5" class="pin"/><text x="576" y="256" text-anchor="end" class="lbl-sm pin-label">18</text><circle cx="588" cy="276" r="5" class="pin"/><text x="576" y="280" text-anchor="end" class="lbl-sm pin-label">5</text><circle cx="588" cy="300" r="5" class="pin"/><text x="576" y="304" text-anchor="end" class="lbl-sm pin-label">17</text><circle cx="588" cy="324" r="5" class="pin"/><text x="576" y="328" text-anchor="end" class="lbl-sm pin-label">16</text><circle cx="588" cy="348" r="5" class="pin"/><text x="576" y="352" text-anchor="end" class="lbl-sm pin-label">4</text><circle cx="588" cy="372" r="5" class="pin"/><text x="576" y="376" text-anchor="end" class="lbl-sm pin-label">0</text></g>
+        <g fill="none" stroke-linejoin="round" stroke-linecap="round">
+          <path d="M120 60 V44 H340 V60 H392" class="w w-vcc"/>
+          <path d="M80 60 V50 H14 V372 H392" class="w w-gnd"/>
+          <path d="M200 60 V34 H620 V180 H588" class="gap"/>
+          <path d="M200 60 V34 H620 V180 H588" class="w w-sda"/>
+          <path d="M160 60 V24 H640 V108 H588" class="gap"/>
+          <path d="M160 60 V24 H640 V108 H588" class="w w-scl"/>
+        </g>
+        <circle cx="80" cy="60" r="5" class="d-gnd"/><circle cx="120" cy="60" r="5" class="d-vcc"/>
+        <circle cx="160" cy="60" r="5" class="d-scl"/><circle cx="200" cy="60" r="5" class="d-sda"/>
+        <circle cx="392" cy="60" r="5.5" class="d-vcc"/><circle cx="392" cy="372" r="5.5" class="d-gnd"/><circle cx="588" cy="108" r="5.5" class="d-scl"/><circle cx="588" cy="180" r="5.5" class="d-sda"/>
+      </svg>
+      </div>
+      <figcaption>El mismo montaje de <code>diagram.json</code>. Los colores de los cables son los que usa Wokwi.</figcaption>
+    </figure>
+
+    <div class="wire-cards">
+      <div class="wire"><span class="sw sw-vcc"></span><div><h3>VCC → 3V3 <small>energía · rojo</small></h3><p>Le da corriente a la pantalla. El ESP32 trabaja a 3,3 voltios, por eso usamos <code>3V3</code>. Es como el enchufe.</p></div></div>
+      <div class="wire"><span class="sw sw-gnd"></span><div><h3>GND → GND <small>tierra · negro</small></h3><p>El camino de regreso de la corriente. Sin él no hay circuito: la energía necesita ir y volver. Los dos aparatos deben compartir GND.</p></div></div>
+      <div class="wire"><span class="sw sw-sda"></span><div><h3>SDA → 21 <small>datos · verde</small></h3><p>Por aquí viajan los mensajes: qué letras dibujar y dónde.</p></div></div>
+      <div class="wire"><span class="sw sw-scl"></span><div><h3>SCL → 22 <small>reloj · azul</small></h3><p>Marca el ritmo, como un metrónomo: en cada «tic» se lee un trocito del mensaje que va por SDA.</p></div></div>
+    </div>
+  </div>
+
+  <div class="pins-explain">
+    <div class="rule">
+      <h3>SDA y SCL juntos forman I2C</h3>
+      <p>I2C es una «calle» de dos cables donde pueden vivir varios aparatos. Cada uno tiene su número de casa, la <strong>dirección</strong>. Nuestra OLED vive en la <code>0x3C</code> (está en <code>diagram.json</code>). El ESP32 escribe a esa dirección y solo la pantalla responde.</p>
+    </div>
+    <div class="rule">
+      <h3>El número del código es la etiqueta</h3>
+      <p>El <code>21</code> no es «la patita 21 contando desde arriba»: es el pin que tiene <strong>21</strong> impreso al lado (GPIO 21). Busca la etiqueta, no cuentes.</p>
+    </div>
+    <div class="rule">
+      <h3>¿Y el <code>print()</code>?</h3>
+      <p>Los pines <code>TX</code> (enviar) y <code>RX</code> (recibir) van al monitor serie de Wokwi. Por ahí llega a tu pantalla el texto de <code>print("vuelta", contador, …)</code>.</p>
+    </div>
+  </div>
+
+  <h3 class="sub-h">Cables y código tienen que decir lo mismo</h3>
+  <p class="section-sub">Así lo dice <code>oled_demo.py</code>. Si el cable está en el 21 pero el código dice otro número, el ESP32 habla por una patita donde no hay nadie escuchando.</p>
+  <div class="code"><span class="lang">python · oled_demo.py</span><pre><span class="c-kw">from</span> machine <span class="c-kw">import</span> Pin, I2C
+<span class="c-kw">import</span> ssd1306
+
+i2c = I2C(0, scl=Pin(<span class="hl hl-scl">22</span>), sda=Pin(<span class="hl hl-sda">21</span>), freq=400000)
+display = ssd1306.SSD1306_I2C(128, 64, i2c)</pre></div>
+  <dl class="facts">
+    <dt>I2C(0, …)</dt><dd>Usa el primer controlador I2C del ESP32.</dd>
+    <dt>scl=Pin(22)</dt><dd>El reloj sale por el pin 22, donde está el cable azul.</dd>
+    <dt>sda=Pin(21)</dt><dd>Los datos salen por el pin 21, donde está el cable verde.</dd>
+    <dt>freq=400000</dt><dd>Velocidad del reloj: 400 000 «tics» por segundo.</dd>
+    <dt>128, 64</dt><dd>Tamaño de la pantalla en puntitos (píxeles): 128 de ancho por 64 de alto.</dd>
+  </dl>
+
+  <h3 class="sub-h">Piensa antes de mirar</h3>
+  <div class="quiz">
+    <details><summary>Si cambias <code>sda=Pin(21)</code> por <code>Pin(19)</code> sin mover el cable, ¿qué verás?</summary><p>La pantalla se queda negra: el ESP32 manda los datos por el 19, pero la OLED escucha en el 21. Código y cables ya no coinciden.</p></details>
+    <details><summary>¿Qué pasa si quitas solo el cable negro (GND)?</summary><p>La pantalla no enciende. La corriente entra por VCC pero no tiene por dónde volver: el circuito queda abierto.</p></details>
+    <details><summary>Si intercambias los cables SDA y SCL en la placa, ¿funcionará?</summary><p>No. El ESP32 enviaría el ritmo por el cable de datos y los datos por el del ritmo. Hay que devolver los cables a su sitio o cambiar también el código.</p></details>
+    <details><summary>¿Por qué en el breakpoint de la línea 29 ya se ve «vuelta 1»?</summary><p>Porque la línea 27 llama a <code>mostrar_contador</code>, que termina con <code>show()</code>: en ese momento los datos viajan por SDA y SCL y la pantalla se actualiza.</p></details>
+  </div>
+  <p class="note">En Wokwi todo es simulado: puedes equivocarte con los cables sin romper nada. Con una placa real, desconecta la energía antes de mover cables.</p>
 </section>
 
 <div class="steps-layout">
@@ -427,7 +558,7 @@ code .</pre></div>
         <li>Pulsa <strong>Start Simulation</strong>, no <strong>Start with Debugger</strong> (ese es el flujo GDB).</li>
         <li>Mantén el simulador visible y sin pausar: una pestaña oculta puede pausar Wokwi.</li>
       </ol>
-      <p>Montaje: DevKit C V4 + OLED SSD1306.</p>
+      <p>Montaje: DevKit C V4 + OLED SSD1306. Qué hace cada cable: <a href="#pines">pines y conexiones</a>.</p>
       <ul class="wiring" aria-label="Cableado">
         <li>GND → <b>GND.1</b></li>
         <li>VCC → <b>3V3</b></li>
