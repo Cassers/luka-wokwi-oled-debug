@@ -306,6 +306,13 @@ html { scroll-behavior: smooth; }
 .diagram .flow.toward { animation: flowback 1.2s linear infinite; }
 .diagram .flow.away { animation: flowfwd 1.2s linear infinite; }
 
+/* ---------- Tutorial de uso ---------- */
+.uso-sec { padding-bottom: 12px; }
+.uso { list-style: none; margin: 0; padding: 0; display: grid; gap: 20px; }
+.uso .inner ul { margin: 6px 0 0; padding-left: 1.1em; }
+.facts dt kbd { font-size: .95em; }
+#problemas { margin-top: 36px; }
+
 /* ---------- Ruta de práctica ---------- */
 .ruta-sec { padding-top: 8px; }
 .how { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px; margin-bottom: 18px; }
@@ -387,18 +394,12 @@ html { scroll-behavior: smooth; }
   <div>
     <p class="eyebrow">Guía para la IA tutora · ESP32 + OLED en Wokwi · edición Halloween</p>
     <h1>Detener Python <em>remoto</em> y ver la OLED en el mismo instante</h1>
-    <p class="lede">Reproduce la demo de diagnóstico de Sergio: pausar MicroPython dentro del ESP32 simulado y observar juntos contador, pila de llamadas y pantalla. Confirmado con capturas el 16 de octubre de 2026: <code>oled_demo.py:29</code>, contador 1 y OLED «vuelta 1».</p>
-    <ul class="specs" aria-label="Equipo probado">
-      <li>Linux x86_64</li>
-      <li>VS Code 1.140</li>
-      <li>GHI MicroPython Debugger 0.2.2</li>
-      <li>pyserial 3.5</li>
-    </ul>
+    <p class="lede">El ESP32 y la pantalla OLED ya están listos en el simulador. Aquí aprendes a usarlos: encender Wokwi, pausar tu programa dentro del ESP32 y ver a la vez las variables y la pantalla. Después, practica con retos de Halloween.</p>
     <div class="repo-cta">
-      <a class="btn-primary" href="https://github.com/Cassers/luka-wokwi-oled-debug">Archivos en GitHub</a>
-      <a class="btn-ghost" href="https://github.com/Cassers/luka-wokwi-oled-debug/archive/refs/heads/main.zip">Descargar ZIP</a>
+      <a class="btn-primary" href="#uso">Tutorial de uso</a>
       <a class="btn-ghost" href="#pines">Cómo funcionan los pines</a>
       <a class="btn-ghost" href="#practica">Ruta de práctica</a>
+      <a class="btn-ghost" href="https://github.com/Cassers/luka-wokwi-oled-debug">Archivos en GitHub</a>
     </div>
   </div>
   <figure class="board" style="margin:0" aria-label="Pantalla OLED esperada en el breakpoint">
@@ -524,177 +525,67 @@ display = ssd1306.SSD1306_I2C(128, 64, i2c)</pre></div>
   <p class="note">En Wokwi todo es simulado: puedes equivocarte con los cables sin romper nada. Con una placa real, desconecta la energía antes de mover cables.</p>
 </section>
 
-<div class="steps-layout">
-  <nav class="rail" aria-label="Pasos">
-    <p class="rail-title">Pasos</p>
-    <ol id="rail">
-      <li><a href="#paso-1"><span class="n">1</span>Inventariar</a></li>
-      <li><a href="#paso-2"><span class="n">2</span>Archivos y raíz</a></li>
-      <li><a href="#paso-3"><span class="n">3</span>Python del puente</a></li>
-      <li><a href="#paso-4"><span class="n">4</span>Extensión GHI</a></li>
-      <li><a href="#paso-5"><span class="n">5</span>Firmware GHI</a></li>
-      <li><a href="#paso-6"><span class="n">6</span>Parche local</a></li>
-      <li><a href="#paso-7"><span class="n">7</span>Iniciar Wokwi</a></li>
-      <li><a href="#paso-8"><span class="n">8</span>Perfil remoto</a></li>
-      <li><a href="#paso-9"><span class="n">9</span>Demostrar</a></li>
-    </ol>
-    <div class="progress"><span id="progress-label">0 de 9 confirmados</span><div class="bar"><i id="progress-bar"></i></div></div>
-  </nav>
+<section class="uso-sec" id="uso" aria-labelledby="uso-t">
+  <p class="eyebrow">Cada vez que vayas a programar</p>
+  <h2 class="section-title" id="uso-t">Tutorial de uso</h2>
+  <p class="section-sub">Todo ya está instalado. Este es el recorrido de cada sesión: abrir, encender el simulador, lanzar el programa, pausarlo y mirar qué pasa por dentro.</p>
 
-  <main class="steps">
+  <ol class="uso">
+    <li class="step">
+      <div class="step-head"><div class="step-num">1</div><h2>Abrir el proyecto</h2></div>
+      <p>En VS Code: <strong>Archivo → Abrir carpeta</strong> y elige la carpeta <code>luka-wokwi-oled-debug</code> entera, no solo <code>MicroPython-debug/</code>.</p>
+      <p>Si hay novedades del profe, tráelas antes de empezar, desde la terminal de VS Code:</p>
+      <div class="code"><span class="lang">sh</span><button class="copy" type="button">Copiar</button><pre>git pull</pre></div>
+    </li>
 
-    <article class="step" id="paso-1">
-      <div class="step-head"><div class="step-num">1</div><h2>Inventariar antes de instalar</h2></div>
-      <p>Pregunta sistema operativo, arquitectura, versión de VS Code, shell, carpeta abierta y perfil activo de extensiones. Confirma si hay Python para el puente, extensión Wokwi y permiso para ejecutar tareas del proyecto.</p>
-      <p class="warn">El puente usa PTY de Linux y <code>/proc</code>. En Windows o macOS hace falta adaptarlo; no basta cambiar una ruta. Si el equipo no es Linux, documenta la diferencia y acuerda la adaptación antes de presentar el procedimiento como reproducible.</p>
-      <div class="checkpoint"><div class="q"><span class="tag">Pide confirmación</span>«¿Qué sistema y versión tienes, y qué carpeta está abierta?»</div><button class="done-btn" data-step="1" aria-pressed="false">Marcar confirmado</button></div>
-    </article>
+    <li class="step">
+      <div class="step-head"><div class="step-num">2</div><h2>Encender el simulador</h2></div>
+      <ol class="inner">
+        <li>Haz clic en el icono de <strong>Wokwi</strong> de la barra lateral.</li>
+        <li><strong>Select Config File</strong> → <code>MicroPython-debug/wokwi.toml</code>.</li>
+        <li>Pulsa <strong>Start Simulation</strong>. No uses <em>Start with Debugger</em>.</li>
+      </ol>
+      <p>Verás el ESP32 y la pantalla. Que esté negra es normal: todavía no se ha dibujado nada. Deja el simulador <strong>a la vista</strong>; si lo ocultas, Wokwi se puede pausar.</p>
+    </li>
 
-    <article class="step" id="paso-2">
-      <div class="step-head"><div class="step-num">2</div><h2>Transferir los archivos y abrir la raíz</h2></div>
-      <p>Los archivos están en el repositorio público <a href="https://github.com/Cassers/luka-wokwi-oled-debug">Cassers/luka-wokwi-oled-debug</a>. Clónalo y abre la carpeta en VS Code:</p>
-      <div class="code"><span class="lang">sh</span><button class="copy" type="button">Copiar</button><pre>git clone https://github.com/Cassers/luka-wokwi-oled-debug.git
-cd luka-wokwi-oled-debug
-code .</pre></div>
-      <p class="note">Sin git: <a href="https://github.com/Cassers/luka-wokwi-oled-debug/archive/refs/heads/main.zip">descarga el ZIP</a>, descomprímelo y abre la carpeta resultante. El repositorio no incluye <code>.venv/</code> ni <code>.tools/</code>: se preparan en los pasos 3 y 5.</p>
-      <p>Estructura relativa que debe quedar en la copia del estudiante:</p>
-      <div class="code"><span class="lang">estructura</span><pre>raíz-del-proyecto/
-├── .vscode/
-│   ├── launch.json
-│   └── tasks.json
-├── tools/wokwi_debug_bridge.py
-└── MicroPython-debug/
-    ├── main.py
-    ├── oled_demo.py
-    ├── practica.py
-    ├── ssd1306.py
-    ├── diagram.json
-    ├── wokwi.toml
-    └── README.md</pre></div>
-      <ul>
-        <li>Abre <strong>la raíz</strong> en VS Code, no solo <code>MicroPython-debug/</code>: tareas y perfiles usan <code>${workspaceFolder}</code>.</li>
-        <li>No copies el <code>.venv</code> del profesor; recréalo en el equipo destino. No supongas que <code>.tools/</code> viene de Git.</li>
-        <li><code>MicroPython/</code> es opcional como fallback normal; sus perfiles extra no hacen falta aquí.</li>
-        <li>Si la copia ya tiene configuraciones propias, intégralas sin sobrescribirlas a ciegas.</li>
-      </ul>
-      <div class="checkpoint"><div class="q"><span class="tag">Pide confirmación</span>Presencia de los archivos y carpeta raíz abierta.</div><button class="done-btn" data-step="2" aria-pressed="false">Marcar confirmado</button></div>
-    </article>
+    <li class="step">
+      <div class="step-head"><div class="step-num">3</div><h2>Lanzar tu programa</h2></div>
+      <ol class="inner">
+        <li>Abre el panel <strong>Ejecutar y depurar</strong> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd>).</li>
+        <li>En el selector de arriba elige qué correr:
+          <ul>
+            <li><strong>Práctica OLED — REMOTA GHI</strong>: tu archivo <code>practica.py</code>.</li>
+            <li><strong>OLED — depuración REMOTA GHI (no Python del PC)</strong>: la demo de las tres vueltas.</li>
+          </ul>
+        </li>
+        <li>Pulsa el triángulo verde <strong>de ese panel</strong>. No uses el botón de «ejecutar archivo» del editor.</li>
+        <li>Se abre una terminal y aparece <strong>Puente activo.</strong> Déjala abierta: es la conexión con el ESP32 simulado.</li>
+        <li>Si se detiene en <strong>Paused on entry</strong>, pulsa <kbd>F5</kbd> para seguir.</li>
+      </ol>
+      <p class="note">Un mensaje de reintento «(1/3)» al arrancar es normal. Espera el resultado final.</p>
+    </li>
 
-    <article class="step" id="paso-3">
-      <div class="step-head"><div class="step-num">3</div><h2>Preparar Python del puente en Linux</h2></div>
-      <p>Desde la raíz, una vez confirmado que <code>python3</code> existe. Si <code>.venv</code> ya existe, inspecciónalo primero: usa el entorno correcto, sin recrearlo ni instalar globalmente a ciegas.</p>
-      <div class="code"><span class="lang">sh</span><button class="copy" type="button">Copiar</button><pre>python3 -m venv .venv
-.venv/bin/python -m pip install pyserial==3.5
-.venv/bin/python -m pip show pyserial</pre></div>
-      <p>Las dos tareas invocan <code>${workspaceFolder}/.venv/bin/python</code>; confirma que esa ruta existe. Python del PC ejecuta el puente; el programa OLED corre en el ESP32 virtual.</p>
-      <div class="checkpoint"><div class="q"><span class="tag">Pide confirmación</span>Entorno utilizable y pyserial 3.5 reconocido.</div><button class="done-btn" data-step="3" aria-pressed="false">Marcar confirmado</button></div>
-    </article>
-
-    <article class="step" id="paso-4">
-      <div class="step-head"><div class="step-num">4</div><h2>Instalar el adaptador correcto en la ventana correcta</h2></div>
-      <ul>
-        <li>En Extensiones de esa misma ventana y perfil, busca <code>@id:ghielectronics.micropython-debugger</code> e instala la <strong>0.2.2</strong>. Comprueba nombre, identificador, versión y que esté habilitada (ver <strong>Disable/Uninstall</strong> en la ficha) también para este workspace.</li>
-        <li>Comprueba que la extensión Wokwi (<code>Wokwi.wokwi-vscode</code>) pueda iniciar una simulación; resuelve la activación pendiente con la cuenta del estudiante.</li>
-        <li>El manifest declara <code>engines.vscode: ^1.85.0</code>, pero la prueba real fue en 1.140, no en todas las versiones compatibles.</li>
-        <li>El perfil usa <code>type: micropython</code>. No elegir debugpy, «Python Debugger» ni C++.</li>
-      </ul>
-      <p class="note">Instalar GHI en otra ventana o perfil no acredita que esté disponible aquí.</p>
-      <div class="checkpoint"><div class="q"><span class="tag">Pide confirmación</span>Identificador, versión y estado de la extensión en la ventana de trabajo.</div><button class="done-btn" data-step="4" aria-pressed="false">Marcar confirmado</button></div>
-    </article>
-
-    <article class="step" id="paso-5">
-      <div class="step-head"><div class="step-num">5</div><h2>Obtener el firmware GHI exacto para simulación</h2></div>
-      <p>Crea <code>.tools/ghi-debug/</code> y descarga desde la fuente oficial <a href="https://raw.githubusercontent.com/ghi-electronics/micropython-vsc-extension/main/docs/firmware/micropython-esp32-generic-uart0-v1.29.0-16-g201fc48cf9.bin">este archivo</a>, conservando su nombre.</p>
+    <li class="step">
+      <div class="step-head"><div class="step-num">4</div><h2>Pausar con un breakpoint</h2></div>
+      <p>Un <strong>breakpoint</strong> es una señal de «para aquí». Haz clic a la izquierda del número de línea: aparece un punto rojo. Cuando el programa llega a esa línea, se congela <em>antes</em> de ejecutarla.</p>
+      <p>Mientras está en pausa puedes mirar tres cosas a la vez:</p>
       <dl class="facts">
-        <dt>Destino</dt><dd><code>.tools/ghi-debug/micropython-esp32-generic-uart0-v1.29.0-16-g201fc48cf9.bin</code></dd>
-        <dt>Variante</dt><dd>ESP32_GENERIC_UART0</dd>
-        <dt>Versión</dt><dd>1.29.0-16-g201fc48cf9</dd>
-        <dt>Tamaño</dt><dd style="font-variant-numeric: tabular-nums">1 829 024 bytes</dd>
-        <dt>MD5</dt><dd><code>0039EDD36E557B0BD1F5DB20CDF97502</code> · cotejar con el <a href="https://raw.githubusercontent.com/ghi-electronics/micropython-vsc-extension/main/docs/firmware/micropython_firmware.json">índice oficial</a></dd>
+        <dt>Variables</dt><dd>Cuánto vale cada variable ahora mismo.</dd>
+        <dt>Pila de llamadas</dt><dd>En qué función estás y quién la llamó.</dd>
+        <dt>Simulador</dt><dd>Lo que la pantalla muestra hasta ese momento.</dd>
       </dl>
-      <ul>
-        <li>Verifica tamaño y MD5 con las herramientas del SO; una descarga HTML no es firmware.</li>
-        <li><code>MicroPython-debug/wokwi.toml</code> ya apunta a ese archivo vía <code>../.tools/ghi-debug/</code> y usa RFC2217 en el puerto 4000.</li>
-        <li>El firmware normal 1.27 de <code>MicroPython/</code> queda separado; no lo sustituyas por el de GHI.</li>
-      </ul>
-      <p class="warn">Esto selecciona firmware del simulador: <strong>no flashear una placa física</strong>. GDB y su puerto 3333 no intervienen.</p>
-      <div class="checkpoint"><div class="q"><span class="tag">Pide confirmación</span>Ruta, tamaño y checksum coincidentes.</div><button class="done-btn" data-step="5" aria-pressed="false">Marcar confirmado</button></div>
-    </article>
+      <p class="note">Pon los breakpoints dentro de funciones, como <code>practica()</code>. En líneas sueltas fuera de una función, a veces no se detiene.</p>
+    </li>
 
-    <article class="step" id="paso-6">
-      <div class="step-head"><div class="step-num">6</div><h2>Aplicar el ajuste local de GHI 0.2.2</h2></div>
-      <p>Copiar el repositorio <strong>no</strong> aplica este parche: modifica un archivo de la extensión instalada en el equipo destino.</p>
-      <ol class="inner">
-        <li>Detén la depuración. Localiza la instalación activa de GHI 0.2.2 (en Linux suele estar en <code>~/.vscode/extensions/ghielectronics.micropython-debugger-0.2.2/</code>), sin reutilizar la ruta del profesor.</li>
-        <li>Guarda una copia intacta de <code>out/debugSession.js</code> en <code>.tools/ghi-debug/debugSession.original.js</code>. No sobrescribas un backup existente sin revisarlo.</li>
-        <li>Si ya contiene el bucle de tres intentos, compruébalo y <strong>no lo reapliques</strong>. Si la versión difiere, revisa primero: nada de sustituciones ciegas.</li>
-        <li>Dentro de <code>launchUart</code>, tras <code>await this.link.open(port, baud);</code> y <code>this.attachEvents();</code>, sustituye solo la llamada siguiente <code>await this.link.conditions(4 /* Cond.Attached */, 0);</code> por este bloque:</li>
-      </ol>
-      <div class="code"><span class="lang">js · out/debugSession.js</span><button class="copy" type="button">Copiar</button><pre><span class="c-com">        // Wokwi can finish booting after UART has already been reopened.
-        // A frame sent too early is lost; retry attachment within a bounded window.</span>
-        <span class="c-kw">let</span> uartAttached = <span class="c-kw">false</span>;
-        <span class="c-kw">for</span> (<span class="c-kw">let</span> attempt = 1; attempt &lt;= 3; attempt++) {
-            <span class="c-kw">try</span> {
-                <span class="c-kw">await</span> this.link.conditions(4 <span class="c-com">/* Cond.Attached */</span>, 0);
-                uartAttached = <span class="c-kw">true</span>;
-                <span class="c-kw">break</span>;
-            }
-            <span class="c-kw">catch</span> (err) {
-                <span class="c-kw">if</span> (attempt === 3) {
-                    <span class="c-kw">throw</span> err;
-                }
-                this.log(<span class="c-str">`UART still booting; retrying attachment (${attempt}/3)...`</span>);
-                <span class="c-kw">await</span> delay(250);
-            }
-        }
-        <span class="c-kw">if</span> (!uartAttached) {
-            <span class="c-kw">throw new</span> Error(<span class="c-str">"UART did not become ready after reboot"</span>);
-        }</pre></div>
-      <ul>
-        <li>El bloque va tras <code>this.attachEvents()</code> y antes de <code>this.link.capabilities()</code>; no cambies otras llamadas de conexión.</li>
-        <li>Hasta tres intentos, 250 ms entre fallos; cada petición conserva el timeout de 5 s de <code>DeviceLink.request</code>.</li>
-        <li>Actualizar o reinstalar la extensión puede pisar el parche. El backup es local y tampoco viene con Git.</li>
-        <li>Ejecuta <strong>Developer: Reload Window</strong> después de guardar y <strong>antes</strong> de iniciar la simulación.</li>
-      </ul>
-      <div class="checkpoint"><div class="q"><span class="tag">Pide confirmación</span>Versión, backup, bloque localizado y ventana recargada.</div><button class="done-btn" data-step="6" aria-pressed="false">Marcar confirmado</button></div>
-    </article>
-
-    <article class="step" id="paso-7">
-      <div class="step-head"><div class="step-num">7</div><h2>Iniciar Wokwi desde su panel</h2></div>
-      <ol class="inner">
-        <li>Cierra depuraciones anteriores, conexiones <code>mpremote</code> y cualquier puente iniciado a mano.</li>
-        <li>En el icono lateral de Wokwi: <strong>Select Config File</strong> → <code>MicroPython-debug/wokwi.toml</code>.</li>
-        <li>Pulsa <strong>Start Simulation</strong>, no <strong>Start with Debugger</strong> (ese es el flujo GDB).</li>
-        <li>Mantén el simulador visible y sin pausar: una pestaña oculta puede pausar Wokwi.</li>
-      </ol>
-      <p>Montaje: DevKit C V4 + OLED SSD1306. Qué hace cada cable: <a href="#pines">pines y conexiones</a>.</p>
-      <ul class="wiring" aria-label="Cableado">
-        <li>GND → <b>GND.1</b></li>
-        <li>VCC → <b>3V3</b></li>
-        <li>SDA → <b>21</b></li>
-        <li>SCL → <b>22</b></li>
-      </ul>
-      <p class="note">La pantalla puede estar negra antes de ejecutar <code>show()</code>; eso no indica una avería.</p>
-      <div class="checkpoint"><div class="q"><span class="tag">Pide confirmación</span>Configuración seleccionada y montaje visible.</div><button class="done-btn" data-step="7" aria-pressed="false">Marcar confirmado</button></div>
-    </article>
-
-    <article class="step" id="paso-8">
-      <div class="step-head"><div class="step-num">8</div><h2>Lanzar el perfil OLED remoto y esperar el puente</h2></div>
-      <ul>
-        <li>Abre <code>MicroPython-debug/oled_demo.py</code> y pon un breakpoint en la <strong>línea 29</strong>, el <code>print</code> posterior a <code>mostrar_contador</code>.</li>
-        <li>En <strong>Ejecutar y depurar</strong>, selecciona <strong>OLED — depuración REMOTA GHI (no Python del PC)</strong> y pulsa el triángulo de ese panel, junto al selector. No uses «Depurar archivo Python» del editor.</li>
-        <li>El perfil lanza solo las tareas: puente con <code>--ensure --recover-stale</code> y validación <code>--check</code>. Espera <strong>Puente activo.</strong> y la comprobación de PID, PTY y propietario. Deja abierta la terminal de la tarea.</li>
-        <li>No lances otro puente manual ni <code>mpremote</code>: GHI transfiere la demo y el controlador con <code>sync: true</code>.</li>
-        <li>El perfil usa UART a 115200 y <code>.tools/wokwi-ghi-uart</code>; que el enlace exista no demuestra que el puente esté vivo.</li>
-        <li>Un reintento <strong>(1/3)</strong> puede ser normal durante el arranque; espera el resultado final.</li>
-      </ul>
-      <div class="checkpoint"><div class="q"><span class="tag">Pide confirmación</span>Tareas aprobadas y estado del depurador. Si aparece <strong>Paused on entry</strong>, pulsa <kbd>F5</kbd> para continuar.</div><button class="done-btn" data-step="8" aria-pressed="false">Marcar confirmado</button></div>
-    </article>
-
-    <article class="step" id="paso-9">
-      <div class="step-head"><div class="step-num">9</div><h2>Demostrar la conexión y avanzar</h2></div>
-      <p>Confirmad juntos: <strong>Paused on breakpoint</strong>, línea 29, Variables y OLED actualizada. La pausa ocurre <em>después</em> de <code>show()</code>. GHI mapea <code>oled_demo.py</code> local al <code>main.py</code> remoto, así que ese nombre en el registro es esperable.</p>
-
+    <li class="step">
+      <div class="step-head"><div class="step-num">5</div><h2>Avanzar paso a paso</h2></div>
+      <dl class="facts">
+        <dt><kbd>F5</kbd></dt><dd>Continuar hasta el siguiente breakpoint.</dd>
+        <dt><kbd>F10</kbd></dt><dd>Ejecutar la línea actual y parar en la siguiente.</dd>
+        <dt><kbd>F11</kbd></dt><dd>Entrar dentro de la función de esta línea.</dd>
+        <dt><kbd>Shift</kbd>+<kbd>F5</kbd></dt><dd>Detener la depuración.</dd>
+      </dl>
+      <p>Pruébalo aquí con la demo. Está pausada en la línea 29 de <code>oled_demo.py</code>, justo después de dibujar:</p>
       <div class="sim" aria-label="Simulación del estado esperado del depurador">
         <div class="sim-bar">
           <span class="sim-status" id="sim-status">⏸ Paused on breakpoint · oled_demo.py:29</span>
@@ -726,47 +617,37 @@ code .</pre></div>
             </div>
           </div>
         </div>
-        <p class="predict" id="sim-predict">Antes de pulsar F5, pide a Luka que prediga el siguiente valor de <code>contador</code>.</p>
+        <p class="predict" id="sim-predict">Antes de pulsar F5, predice el siguiente valor de <code>contador</code>.</p>
       </div>
+      <p class="note">Antes de cada <kbd>F5</kbd>, di en voz alta qué esperas ver. Luego compara con Variables y con la pantalla.</p>
+    </li>
 
-      <ul>
-        <li><kbd>F5</kbd> continúa al siguiente breakpoint · <kbd>F10</kbd> avanza por líneas sin entrar en llamadas · <kbd>F11</kbd> entra en una función.</li>
-        <li>Antes de continuar, pide predecir el siguiente contador; después comparad pantalla y variables. La demo tiene tres vueltas, sin <code>sleep</code>.</li>
-      </ul>
-      <p class="note">Ver Variables no basta: la combinación de adaptador remoto, pila y pantalla es lo que distingue este éxito de un depurador local.</p>
-      <div class="checkpoint"><div class="q"><span class="tag">Pide confirmación</span>Pausa remota, locales, pila y OLED coinciden; F5 alcanza la vuelta siguiente.</div><button class="done-btn" data-step="9" aria-pressed="false">Marcar confirmado</button></div>
-    </article>
+    <li class="step">
+      <div class="step-head"><div class="step-num">6</div><h2>Terminar la sesión</h2></div>
+      <ol class="inner">
+        <li>Detén la depuración con <kbd>Shift</kbd>+<kbd>F5</kbd>.</li>
+        <li>Cierra la terminal del puente (icono de papelera de la terminal).</li>
+        <li>Detén Wokwi.</li>
+      </ol>
+      <p class="note">El ESP32 simulado no guarda nada al apagarse: tu código vive en <code>practica.py</code> y se vuelve a enviar cada vez que lanzas.</p>
+    </li>
+  </ol>
 
-  </main>
-</div>
-
-<h2 class="section-title" id="diagnostico">Diagnóstico dirigido</h2>
-<p class="section-sub">Síntomas frecuentes y qué debe hacer la IA tutora en cada caso.</p>
-<div class="table-wrap">
-  <table>
-    <thead><tr><th>Síntoma</th><th>Acción de la IA</th></tr></thead>
-    <tbody>
-      <tr><td><code>debugpy/launcher</code> o error de <code>machine</code> en el PC</td><td>Se está ejecutando CPython local. Detener y seleccionar el perfil remoto del panel. No <code>pip install machine</code>.</td></tr>
-      <tr><td>Tipo <code>micropython</code> no reconocido</td><td>Revisar GHI en esta ventana y perfil, y recargar. No sustituirlo por un adaptador Python o C++.</td></tr>
-      <tr><td>Falla <code>preLaunchTask</code></td><td>No elegir <strong>Debug Anyway</strong>. Leer la terminal de tareas y corregir antes de lanzar.</td></tr>
-      <tr><td>PTY obsoleto o enlace existente</td><td><code>--check</code> verifica el propietario; <code>--recover-stale</code> solo recupera restos propios documentados de un PID inexistente. No abrir ni borrar PTY o enlaces ajenos.</td></tr>
-      <tr><td><code>Lost connection to the board</code></td><td>Aviso genérico, no prueba de fallo USB. Revisar Debug Console, firmware, parche, puente y simulación visible.</td></tr>
-      <tr><td>Pantalla negra o imagen anterior</td><td>Si aún no pasó <code>show()</code>, es normal. Comprobar el breakpoint 29 antes de tocar el cableado.</td></tr>
-      <tr><td>Breakpoint de nivel superior no se detiene</td><td>GHI tiene limitaciones de pausa en código de módulo; usar las funciones de la demo proporcionada.</td></tr>
-      <tr><td>Detener/iniciar Wokwi o recargar la ventana</td><td>Terminar la sesión y la tarea del puente anterior y relanzar el perfil para crear y validar el enlace. No asumir persistencia.</td></tr>
-    </tbody>
-  </table>
-</div>
-
-<h2 class="section-title" id="aceptacion">Aceptación</h2>
-<p class="section-sub">La sesión está completa cuando todo esto se cumple en el equipo de Luka.</p>
-<ul class="accept">
-  <li><label><input type="checkbox" id="acc-1"><span>Versiones, archivos, firmware y checksum registrados en el equipo destino.</span></label></li>
-  <li><label><input type="checkbox" id="acc-2"><span>Parche local revisado, backup conservado y ventana recargada.</span></label></li>
-  <li><label><input type="checkbox" id="acc-3"><span>Inicio normal de Wokwi; tareas automáticas y comprobación del puente aprobadas.</span></label></li>
-  <li><label><input type="checkbox" id="acc-4"><span>Pausa remota en línea 29; locales, pila y «vuelta 1» coinciden; F5 alcanza la siguiente vuelta.</span></label></li>
-  <li><label><input type="checkbox" id="acc-5"><span>Luka explica por qué <code>show()</code> precede al breakpoint y por qué Python del PC no maneja esta OLED.</span></label></li>
-</ul>
+  <h3 class="sub-h" id="problemas">Si algo falla</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Lo que ves</th><th>Qué hacer</th></tr></thead>
+      <tbody>
+        <tr><td>Error de <code>machine</code> o la palabra <code>debugpy</code></td><td>Se lanzó Python del PC, no el del ESP32. Detén y elige un perfil <strong>REMOTA GHI</strong> en el panel Ejecutar y depurar.</td></tr>
+        <tr><td>Falla la tarea antes de lanzar</td><td>No elijas <strong>Debug Anyway</strong>. Lee la terminal de la tarea y comprueba que Wokwi está encendido con <code>MicroPython-debug/wokwi.toml</code>.</td></tr>
+        <tr><td><code>Lost connection to the board</code></td><td>Comprueba que el simulador está visible y sin pausar. Detén todo (paso 6) y vuelve a empezar desde el paso 2.</td></tr>
+        <tr><td>Pantalla negra o dibujo viejo</td><td>Si la pausa está antes de <code>show()</code>, es normal. Avanza con <kbd>F10</kbd> hasta pasar <code>show()</code>.</td></tr>
+        <tr><td>Recargaste VS Code o reiniciaste Wokwi</td><td>La conexión anterior ya no sirve. Detén la depuración y lanza el perfil otra vez.</td></tr>
+        <tr><td>Nada de lo anterior</td><td>Copia el mensaje completo del error y enséñaselo a tu tutor.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
 
 <section class="ruta-sec" id="practica" aria-labelledby="practica-t">
   <p class="eyebrow">Después de la demo</p>
@@ -777,10 +658,11 @@ code .</pre></div>
     <div class="rule">
       <h3>Cómo se practica</h3>
       <ol class="inner">
+        <li>Enciende Wokwi como en el <a href="#uso">tutorial de uso</a> (pasos 1 y 2). Si es la primera vez, haz <code>git pull</code> para traer <code>practica.py</code>.</li>
         <li>Abre <code>MicroPython-debug/practica.py</code>.</li>
         <li>Reemplaza lo que está dentro de <code>def practica(display):</code> por el código de la práctica.</li>
         <li>Completa los huecos <span class="blank">___</span>.</li>
-        <li>En Ejecutar y depurar elige <strong>Práctica OLED — REMOTA GHI</strong> y pulsa el triángulo. Wokwi debe estar en marcha con <code>MicroPython-debug/wokwi.toml</code>.</li>
+        <li>En Ejecutar y depurar elige <strong>Práctica OLED — REMOTA GHI</strong> y pulsa el triángulo.</li>
         <li>Si aparece <strong>Paused on entry</strong>, pulsa <kbd>F5</kbd>. Al terminar, detén la depuración antes de cambiar de práctica.</li>
       </ol>
     </div>
@@ -1054,19 +936,12 @@ code .</pre></div>
   </ol>
 </section>
 
-<div class="closing">
-  <div class="rule"><h3>Al terminar</h3><p>Detén la depuración y la tarea del puente antes de detener Wokwi. El almacenamiento simulado es volátil; GHI resincroniza al lanzar.</p></div>
-  <div class="rule"><h3>Fallback opcional</h3><p>Seleccionar <code>MicroPython/wokwi.toml</code> y seguir la guía normal (<code>MicroPython/GUIA-AGENTE-LUKA.md</code>, no incluida en el repositorio; pedirla al profesor) con su firmware y carga <code>mpremote</code>, después de liberar el puente.</p></div>
-  <div class="rule"><h3>Cómo sigue</h3><p>La enseñanza continúa por pistas: funciones, variables, bucles y predicción. Este éxito no autoriza generar lógica de robots.</p></div>
-</div>
-
 <footer class="sources">
-  <strong>Fuentes y alcance</strong>
+  <strong>Enlaces</strong>
   <ul>
-    <li>En el repositorio: <a href="https://github.com/Cassers/luka-wokwi-oled-debug/blob/main/MicroPython-debug/README.md">README de la demo</a> (evidencia del 16/10/2026), <a href="https://github.com/Cassers/luka-wokwi-oled-debug/blob/main/.vscode/launch.json">perfiles</a>, <a href="https://github.com/Cassers/luka-wokwi-oled-debug/blob/main/.vscode/tasks.json">tareas</a> y <a href="https://github.com/Cassers/luka-wokwi-oled-debug/blob/main/tools/wokwi_debug_bridge.py">puente</a>.</li>
-    <li><a href="https://github.com/ghi-electronics/micropython-vsc-extension">GHI: documentación y código oficiales</a> · <a href="https://raw.githubusercontent.com/ghi-electronics/micropython-vsc-extension/main/docs/firmware/micropython_firmware.json">índice oficial de firmware</a>.</li>
-    <li><a href="https://docs.wokwi.com/vscode/project-config">Wokwi: configuración y RFC2217</a>.</li>
-    <li>La combinación GHI + Wokwi es experimental y requiere un parche local; no es una garantía oficial de GHI ni cubre otros SO o versiones. El comentario de <code>oled_demo.py</code> que dice «aún no confirmada» es anterior al éxito registrado.</li>
+    <li>Archivos: <a href="https://github.com/Cassers/luka-wokwi-oled-debug">Cassers/luka-wokwi-oled-debug</a> · <a href="https://github.com/Cassers/luka-wokwi-oled-debug/blob/main/MicroPython-debug/practica.py">practica.py</a> · <a href="https://github.com/Cassers/luka-wokwi-oled-debug/blob/main/MicroPython-debug/oled_demo.py">oled_demo.py</a>.</li>
+    <li><a href="https://docs.micropython.org/en/latest/library/framebuf.html">MicroPython: funciones de dibujo (framebuf)</a> · <a href="https://docs.wokwi.com/vscode/getting-started">Wokwi para VS Code</a>.</li>
+    <li>La depuración remota GHI + Wokwi es experimental: si algo raro pasa, avisa a tu tutor con el mensaje completo.</li>
   </ul>
 </footer>
 
@@ -1075,44 +950,15 @@ code .</pre></div>
 <script>
 (function () {
   var KEY = "luka-guia-oled-v1";
-  var state = { steps: {}, acc: {} };
+  var state = { acc: {} };
   try { var raw = localStorage.getItem(KEY); if (raw) state = Object.assign(state, JSON.parse(raw)); } catch (e) {}
+  if (!state.acc) state.acc = {};
   function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
 
-  var railLinks = Array.prototype.slice.call(document.querySelectorAll("#rail a"));
-  function renderProgress() {
-    var n = 0;
-    document.querySelectorAll(".done-btn").forEach(function (b) {
-      var on = !!state.steps[b.dataset.step];
-      b.setAttribute("aria-pressed", on ? "true" : "false");
-      b.textContent = on ? "Confirmado ✓" : "Marcar confirmado";
-      railLinks[b.dataset.step - 1].classList.toggle("done", on);
-      if (on) n++;
-    });
-    document.getElementById("progress-label").textContent = n + " de 9 confirmados";
-    document.getElementById("progress-bar").style.width = (n / 9 * 100) + "%";
-  }
-  document.querySelectorAll(".done-btn").forEach(function (b) {
-    b.addEventListener("click", function () { state.steps[b.dataset.step] = !state.steps[b.dataset.step]; save(); renderProgress(); });
-  });
-  renderProgress();
-
-  document.querySelectorAll(".accept input, .ex-done input").forEach(function (cb) {
+  document.querySelectorAll(".ex-done input").forEach(function (cb) {
     cb.checked = !!state.acc[cb.id];
     cb.addEventListener("change", function () { state.acc[cb.id] = cb.checked; save(); });
   });
-
-  // active step in rail
-  if ("IntersectionObserver" in window) {
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) {
-        if (en.isIntersecting) {
-          railLinks.forEach(function (a) { a.classList.toggle("active", a.getAttribute("href") === "#" + en.target.id); });
-        }
-      });
-    }, { rootMargin: "-30% 0px -60% 0px" });
-    document.querySelectorAll(".step").forEach(function (s) { io.observe(s); });
-  }
 
   // copy buttons
   document.querySelectorAll(".copy").forEach(function (btn) {
@@ -1143,7 +989,7 @@ code .</pre></div>
       document.getElementById("sim-vuelta").textContent = "vuelta " + vuelta;
       status.textContent = "⏸ Paused on breakpoint · oled_demo.py:29";
       predict.innerHTML = vuelta < 3
-        ? "Antes de pulsar F5, pide a Luka que prediga el siguiente valor de <code>contador</code>."
+        ? "Antes de pulsar F5, predice el siguiente valor de <code>contador</code>."
         : "Última vuelta. ¿Qué pasará al pulsar F5 otra vez?";
       f5.disabled = false;
     } else {
@@ -1153,8 +999,10 @@ code .</pre></div>
     }
     [vc, vi].forEach(function (el) { el.classList.toggle("changed", !!changed); });
   }
-  f5.addEventListener("click", function () { vuelta++; renderSim(true); });
-  document.getElementById("sim-reset").addEventListener("click", function () { vuelta = 1; renderSim(false); });
+  if (f5) {
+    f5.addEventListener("click", function () { vuelta++; renderSim(true); });
+    document.getElementById("sim-reset").addEventListener("click", function () { vuelta = 1; renderSim(false); });
+  }
 })();
 </script>
 

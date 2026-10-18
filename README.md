@@ -2,8 +2,8 @@
 
 Demo de diagnóstico para Luka: pausar MicroPython dentro de un ESP32 **simulado** en Wokwi (VS Code + GHI MicroPython Debugger) y comprobar a la vez variables, pila de llamadas y pantalla OLED SSD1306.
 
-**Guía paso a paso (web):** https://cassers.github.io/luka-wokwi-oled-debug/
-También en Markdown: [MicroPython-debug/GUIA-BOT-LUKA.md](MicroPython-debug/GUIA-BOT-LUKA.md).
+**Guía web (tutorial de uso, pines y ruta de práctica):** https://cassers.github.io/luka-wokwi-oled-debug/
+Instalación inicial (para la IA tutora): [MicroPython-debug/GUIA-BOT-LUKA.md](MicroPython-debug/GUIA-BOT-LUKA.md).
 
 ## Obtener los archivos
 
