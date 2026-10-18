@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "author": "Sergio Castro",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-devkit-c-v4",
+      "id": "esp",
+      "top": -72,
+      "left": 139,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-max7219-matrix",
+      "id": "matrix1",
+      "top": -40,
+      "left": -160,
+      "attrs": {
+        "chain": "1",
+        "color": "orange"
+      }
+    }
+  ],
+  "connections": [
+    [
+      "esp:TX",
+      "$serialMonitor:RX",
+      "",
+      []
+    ],
+    [
+      "esp:RX",
+      "$serialMonitor:TX",
+      "",
+      []
+    ],
+    [
+      "matrix1:VCC",
+      "esp:5V",
+      "red",
+      []
+    ],
+    [
+      "matrix1:GND",
+      "esp:GND.1",
+      "black",
+      []
+    ],
+    [
+      "matrix1:DIN",
+      "esp:23",
+      "green",
+      []
+    ],
+    [
+      "matrix1:CS",
+      "esp:5",
+      "orange",
+      []
+    ],
+    [
+      "matrix1:CLK",
+      "esp:18",
+      "blue",
+      []
+    ]
+  ]
+}

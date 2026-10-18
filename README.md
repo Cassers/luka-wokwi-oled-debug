@@ -22,12 +22,17 @@ Sin git: botón **Code → Download ZIP** y abrir en VS Code la carpeta descompr
 .vscode/tasks.json    tareas que arrancan y comprueban el puente
 tools/wokwi_debug_bridge.py   puente RFC2217 → PTY (Linux)
 MicroPython-debug/    demo OLED, practica.py (ejercicios), controlador ssd1306, circuito Wokwi y guía
+chips/                4 circuitos extra: DHT22, MPU6050 (I2C), MAX7219 (SPI), UART
 index.html            la guía web (GitHub Pages)
 ```
 
 ## Practicar
 
 Después de la demo, la guía web tiene una **ruta de práctica** (teoría → práctica → concepto nuevo → práctica…). Se trabaja en `MicroPython-debug/practica.py` con el perfil **Práctica OLED — REMOTA GHI**.
+
+## Hablar con otros chips
+
+Cada carpeta de `chips/` trae su programa, `diagram.json`, `wokwi.toml` y perfil de depuración (**Chip N · … — REMOTA GHI**). En Wokwi: Select Config File → `chips/<carpeta>/wokwi.toml`. Explicación paso a paso en la guía web, sección «Hablar con otros chips».
 
 ## Qué NO contiene (lo preparas tú siguiendo la guía)
 

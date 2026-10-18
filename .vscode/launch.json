@@ -28,6 +28,58 @@
             "checkFirmwareUpdate": false
         },
         {
+            "name": "Chip 1 · DHT22 termómetro — REMOTA GHI",
+            "preLaunchTask": "Wokwi GHI: comprobar puente activo",
+            "type": "micropython",
+            "request": "launch",
+            "program": "${workspaceFolder}/chips/1-dht22/termometro.py",
+            "sync": true,
+            "stopOnEntry": true,
+            "debugInterface": "uart",
+            "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "debugBaud": 115200,
+            "checkFirmwareUpdate": false
+        },
+        {
+            "name": "Chip 2 · MPU6050 varita — REMOTA GHI",
+            "preLaunchTask": "Wokwi GHI: comprobar puente activo",
+            "type": "micropython",
+            "request": "launch",
+            "program": "${workspaceFolder}/chips/2-mpu6050/varita.py",
+            "sync": true,
+            "stopOnEntry": true,
+            "debugInterface": "uart",
+            "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "debugBaud": 115200,
+            "checkFirmwareUpdate": false
+        },
+        {
+            "name": "Chip 3 · MAX7219 calabaza — REMOTA GHI",
+            "preLaunchTask": "Wokwi GHI: comprobar puente activo",
+            "type": "micropython",
+            "request": "launch",
+            "program": "${workspaceFolder}/chips/3-max7219/calabaza_leds.py",
+            "sync": true,
+            "stopOnEntry": true,
+            "debugInterface": "uart",
+            "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "debugBaud": 115200,
+            "checkFirmwareUpdate": false
+        },
+        {
+            "name": "Chip 4 · UART mensaje secreto — REMOTA GHI",
+            "preLaunchTask": "Wokwi GHI: comprobar puente activo",
+            "type": "micropython",
+            "request": "launch",
+            "program": "${workspaceFolder}/chips/4-uart/mensaje_secreto.py",
+            "sync": true,
+            "stopOnEntry": true,
+            "debugInterface": "uart",
+            "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "debugBaud": 115200,
+            "checkFirmwareUpdate": false
+        },
+        {
             "name": "MicroPython GHI — prueba Python en Wokwi (experimental)",
             "preLaunchTask": "Wokwi GHI: comprobar puente activo",
             "type": "micropython",

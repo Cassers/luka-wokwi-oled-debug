@@ -340,6 +340,35 @@ html { scroll-behavior: smooth; }
 @media (max-width: 900px) { .map-grid { grid-template-columns: minmax(0, 1fr); } .map-fig { max-width: 420px; } }
 @media (max-width: 600px) { .m-groups { grid-template-columns: minmax(0, 1fr); } }
 
+/* ---------- Otros chips ---------- */
+.chips-sec { padding-top: 8px; }
+.chip-conn { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px; align-items: center; margin: 6px 0 12px; }
+.mini-svg { display: block; width: 100%; max-width: 480px; height: auto; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+.mini-svg .pcb { fill: var(--board); }
+.mini-svg .pin { fill: #c9a85a; }
+.mini-svg .lbl { font-family: var(--f-mono); font-size: 14px; font-weight: 600; fill: var(--board-ink); }
+.mini-svg .lbl-sm { font-family: var(--f-mono); font-size: 11px; fill: var(--board-ink); }
+.chip-conn .wiring { flex-direction: column; align-items: flex-start; }
+.sw-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.ch4 { font-family: var(--f-display); font-size: 1.05rem; margin: 18px 0 10px; color: var(--accent); }
+.csteps { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 12px; }
+.csteps li { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; align-items: start; }
+.cstep-n { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-family: var(--f-mono); font-weight: 600; background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
+.cstep-b { min-width: 0; }
+.cstep-b h4 { font-family: var(--f-display); font-size: 1rem; margin: 4px 0 4px; }
+.cstep-b p { margin: 0 0 8px; }
+.cstep-b .code { margin-bottom: 4px; }
+.full { border: 1px dashed var(--line); border-radius: 8px; padding: 10px 14px; margin: 0 0 12px; }
+.full summary { cursor: pointer; font-weight: 700; }
+.full .code { margin: 12px 0 0; }
+.runbox { background: var(--accent-soft); border-radius: 8px; padding: 10px 14px; font-size: .95rem; }
+.recipe { margin: 0 0 4px; padding-left: 1.3em; max-width: 70ch; }
+.recipe li { margin-bottom: 4px; }
+.proto-table { min-width: 560px; }
+.proto-table td:first-child { width: auto; white-space: nowrap; color: var(--accent); }
+.blk .table-wrap { margin-bottom: 12px; }
+@media (max-width: 900px) { .chip-conn { grid-template-columns: minmax(0, 1fr); } }
+
 /* ---------- Ruta de práctica ---------- */
 .ruta-sec { padding-top: 8px; }
 .how { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px; margin-bottom: 18px; }
@@ -426,6 +455,7 @@ html { scroll-behavior: smooth; }
       <a class="btn-primary" href="#uso">Tutorial de uso</a>
       <a class="btn-ghost" href="#pines">Cómo funcionan los pines</a>
       <a class="btn-ghost" href="#practica">Ruta de práctica</a>
+      <a class="btn-ghost" href="#chips">Otros chips</a>
       <a class="btn-ghost" href="https://github.com/Cassers/luka-wokwi-oled-debug">Archivos en GitHub</a>
     </div>
   </div>
@@ -994,10 +1024,398 @@ display = ssd1306.SSD1306_I2C(128, 64, i2c)</pre></div>
   </div>
 </section>
 
+<section class="chips-sec" id="chips" aria-labelledby="chips-t">
+  <p class="eyebrow">Siguiente nivel</p>
+  <h2 class="section-title" id="chips-t">Hablar con otros chips</h2>
+  <p class="section-sub">El ESP32 puede conversar con sensores, pantallas y otras placas. Cada uno habla un «idioma» (protocolo). Aquí verás cuatro, cada uno con su circuito en Wokwi, su código completo y una práctica. Todo está en la carpeta <code>chips/</code> del repositorio (haz <code>git pull</code> si no la tienes).</p>
+
+  <ol class="ruta">
+    <li class="blk teo">
+      <span class="kchip k-teo">Teoría</span>
+      <h3>Los cuatro idiomas de los chips</h3>
+      <div class="table-wrap"><table class="proto-table">
+        <thead><tr><th>Protocolo</th><th>Cables de datos</th><th>¿Cómo sabe a quién le habla?</th><th>Chip de ejemplo</th></tr></thead>
+        <tbody>
+          <tr><td>Un cable</td><td>1: datos</td><td>Solo hay un chip en ese cable</td><td>DHT22 (temperatura)</td></tr>
+          <tr><td>I2C</td><td>2: SDA (datos) y SCL (reloj)</td><td>Cada chip tiene una <strong>dirección</strong>, como un número de casa</td><td>MPU6050 (movimiento) y la OLED</td></tr>
+          <tr><td>SPI</td><td>3: MOSI (datos), SCK (reloj) y CS</td><td>Un cable <strong>CS</strong> por chip: «te hablo a ti»</td><td>MAX7219 (matriz de LEDs)</td></tr>
+          <tr><td>UART</td><td>2: TX (envía) y RX (recibe), cruzados</td><td>Solo hay dos: uno en cada punta</td><td>Otra placa, un GPS, el PC</td></tr>
+        </tbody>
+      </table></div>
+      <p>Para cualquier chip, la receta siempre es la misma:</p>
+      <ol class="recipe">
+        <li><b>Energía:</b> VCC a 3V3 (o 5V si el chip lo pide) y GND a GND.</li>
+        <li><b>Cables de datos:</b> a los pines que elijas, según el protocolo.</li>
+        <li><b>Crear el bus en el código</b> diciendo qué pines usaste.</li>
+        <li><b>Comprobar que el chip responde</b> antes de pedirle nada.</li>
+        <li><b>Leer o escribir datos</b> y mostrarlos.</li>
+      </ol>
+    </li>
+
+    <li class="blk con">
+      <span class="kchip k-con">Concepto nuevo · Un cable</span>
+      <h3>Chip 1 · DHT22, el termómetro embrujado</h3>
+      <p>El DHT22 mide <strong>temperatura y humedad</strong>. Usa un solo cable de datos: el ESP32 le pide una medida y el sensor responde por el mismo cable, por turnos.</p>
+      <div class="chip-conn"><svg class="mini-svg" viewBox="0 0 480 142" role="img" aria-label="Cableado del DHT22: VCC a 3V3, GND a GND y datos al pin 4"><rect x="10" y="10" width="140" height="122" rx="8" class="pcb"/><text x="24" y="75" class="lbl">ESP32</text><rect x="330" y="10" width="140" height="122" rx="8" class="pcb"/><text x="456" y="75" class="lbl" text-anchor="end">DHT22</text><line x1="150" y1="36" x2="330" y2="36" stroke="var(--w-vcc)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="36" r="6" class="pin"/><text x="140" y="40" class="lbl-sm" text-anchor="end">3V3</text><circle cx="330" cy="36" r="6" class="pin"/><text x="340" y="40" class="lbl-sm">VCC</text><line x1="150" y1="70" x2="330" y2="70" stroke="var(--w-gnd)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="70" r="6" class="pin"/><text x="140" y="74" class="lbl-sm" text-anchor="end">GND</text><circle cx="330" cy="70" r="6" class="pin"/><text x="340" y="74" class="lbl-sm">GND</text><line x1="150" y1="104" x2="330" y2="104" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="104" r="6" class="pin"/><text x="140" y="108" class="lbl-sm" text-anchor="end">4</text><circle cx="330" cy="104" r="6" class="pin"/><text x="340" y="108" class="lbl-sm">SDA (datos)</text></svg><ul class="wiring"><li><span class="sw-dot" style="background:var(--w-vcc)"></span>VCC → <b>3V3</b></li><li><span class="sw-dot" style="background:var(--w-gnd)"></span>GND → <b>GND</b></li><li><span class="sw-dot" style="background:var(--accent)"></span>SDA (datos) → <b>4</b></li></ul></div>
+      <p class="note">También lleva la OLED conectada como siempre (21, 22, 3V3 y GND) para mostrar los valores.</p>
+      <h4 class="ch4">Configurar la comunicación, paso a paso</h4>
+      <ol class="csteps"><li><div class="cstep-n">1</div><div class="cstep-b"><h4>Importar el módulo</h4><p>MicroPython ya trae el idioma del DHT22: se llama <code>dht</code>.</p><div class="code"><span class="lang">python</span><pre><span class="c-kw">import</span> dht
+<span class="c-kw">from</span> machine <span class="c-kw">import</span> Pin</pre></div></div></li><li><div class="cstep-n">2</div><div class="cstep-b"><h4>Crear el sensor con su pin</h4><p>Solo hay que decirle en qué pin está el cable de datos. Si el cable va al 4, el código dice 4.</p><div class="code"><span class="lang">python</span><pre>sensor = dht.DHT22(Pin(4))</pre></div></div></li><li><div class="cstep-n">3</div><div class="cstep-b"><h4>Pedir una medida</h4><p><code>measure()</code> hace la conversación por el cable: el ESP32 pregunta y el sensor contesta.</p><div class="code"><span class="lang">python</span><pre>sensor.measure()</pre></div></div></li><li><div class="cstep-n">4</div><div class="cstep-b"><h4>Leer los valores</h4><p>Después de medir, se leen los dos números. Entre medidas hay que esperar al menos 2 segundos.</p><div class="code"><span class="lang">python</span><pre>temperatura = sensor.temperature()   <span class="c-com"># grados Celsius</span>
+humedad = sensor.humidity()         <span class="c-com"># porcentaje</span></pre></div></div></li><li><div class="cstep-n">5</div><div class="cstep-b"><h4>Comprobar</h4><p>Pon un breakpoint en <code>mostrar(...)</code> y mira <code>temperatura</code> y <code>humedad</code> en Variables. Mientras corre la simulación, haz clic en el DHT22 de Wokwi: aparecen controles para cambiar la temperatura.</p></div></li></ol>
+      <details class="full"><summary>Ver el archivo completo: <code>chips/1-dht22/termometro.py</code></summary><div class="code"><span class="lang">python · termometro.py</span><button class="copy" type="button">Copiar</button><pre><span class="c-com"># Chip 1 · DHT22: el termómetro embrujado.</span>
+<span class="c-com"># Protocolo de UN cable: el sensor y el ESP32 se turnan para hablar por el pin 4.</span>
+<span class="c-kw">import</span> time
+<span class="c-kw">import</span> dht
+<span class="c-kw">from</span> machine <span class="c-kw">import</span> Pin, I2C
+<span class="c-kw">import</span> ssd1306
+
+
+<span class="c-kw">def</span> preparar_pantalla():
+    i2c = I2C(0, scl=Pin(22), sda=Pin(21), freq=400000)
+    <span class="c-kw">return</span> ssd1306.SSD1306_I2C(128, 64, i2c)
+
+
+<span class="c-kw">def</span> preparar_sensor():
+    <span class="c-com"># El DHT22 solo necesita saber en qué pin está su cable de datos.</span>
+    <span class="c-kw">return</span> dht.DHT22(Pin(4))
+
+
+<span class="c-kw">def</span> leer(sensor):
+    sensor.measure()  <span class="c-com"># pide una medida nueva al sensor</span>
+    <span class="c-kw">return</span> sensor.temperature(), sensor.humidity()
+
+
+<span class="c-kw">def</span> mostrar(display, temperatura, humedad):
+    display.fill(0)
+    display.text(<span class="c-str">"Termometro"</span>, 24, 0, 1)
+    display.text(<span class="c-str">"Temp: %.1f C"</span> % temperatura, 0, 20, 1)
+    display.text(<span class="c-str">"Humedad: %d %%"</span> % humedad, 0, 32, 1)
+    <span class="c-kw">if</span> temperatura &gt; 30:
+        display.text(<span class="c-str">"Calor de caldero"</span>, 0, 52, 1)
+    display.show()
+
+
+<span class="c-kw">def</span> main():
+    display = preparar_pantalla()
+    sensor = preparar_sensor()
+    <span class="c-kw">for</span> vuelta <span class="c-kw">in</span> range(30):
+        temperatura, humedad = leer(sensor)
+        mostrar(display, temperatura, humedad)  <span class="c-com"># breakpoint aquí para ver los valores</span>
+        time.sleep(2)  <span class="c-com"># el DHT22 necesita 2 segundos entre medidas</span>
+
+
+<span class="c-kw">if</span> __name__ == <span class="c-str">"__main__"</span>:
+    main()</pre></div></details>
+      <div class="runbox"><b>Para probarlo:</b> en Wokwi, <strong>Select Config File</strong> → <code>chips/1-dht22/wokwi.toml</code> y <strong>Start Simulation</strong>. Luego, en Ejecutar y depurar, elige <strong>Chip 1 · DHT22 termómetro — REMOTA GHI</strong>.</div>
+    </li>
+
+    <li class="blk pra">
+      <span class="kchip k-pra">Práctica · Chip 1</span>
+      <h3>Alarma de frío de tumba</h3>
+      <p class="meta">Usa: <code>if</code> · <code>elif</code> · el DHT22</p>
+      <p>En <code>termometro.py</code>, dentro de <code>mostrar</code>, añade un aviso cuando haga frío:</p>
+      <div class="code"><span class="lang">python · termometro.py</span><button class="copy" type="button">Copiar</button><pre>    <span class="c-kw">if</span> temperatura &gt; 30:
+        display.text(<span class="c-str">"Calor de caldero"</span>, 0, 52, 1)
+    <span class="c-kw">elif</span> temperatura &lt; <span class="blank">___</span>:
+        display.text(<span class="blank">___</span>, 0, 52, 1)</pre></div>
+      <div class="hints"><details><summary>Pista 1</summary><p><code>elif</code> significa «si no pasó lo de arriba, pero pasa esto otro».</p></details><details><summary>Pista 2</summary><p>Elige un número de grados que te parezca frío, por ejemplo menos de 5.</p></details><details><summary>Pista 3</summary><p>El texto va entre comillas y no puede pasar de 16 letras. Sin tildes: la OLED no las tiene.</p></details></div>
+      <p class="check"><strong>Comprueba:</strong> haz clic en el DHT22 en Wokwi y baja la temperatura. ¿En qué valor exacto cambia el mensaje? ¿Qué pasa justo en ese número?</p>
+      <label class="ex-done"><input type="checkbox" id="chip-1"><span>¡Lo logré!</span></label>
+    </li>
+
+    <li class="blk pro">
+      <span class="kchip k-pro">Profundización · I2C</span>
+      <h3>Chip 2 · MPU6050, la varita mágica</h3>
+      <p>El MPU6050 mide <strong>inclinación y movimiento</strong>. Habla I2C, el mismo idioma que la OLED, así que <strong>comparte los mismos dos cables</strong>: SDA en el 21 y SCL en el 22. ¿Cómo sabe cada chip que le hablan a él? Por su dirección: la OLED es la <code>0x3C</code> y el MPU6050 la <code>0x68</code>.</p>
+      <div class="chip-conn"><svg class="mini-svg" viewBox="0 0 480 250" role="img" aria-label="La OLED y el MPU6050 comparten los cables SDA y SCL">
+<rect x="10" y="10" width="140" height="230" rx="8" class="pcb"/><text x="24" y="130" class="lbl">ESP32</text>
+<rect x="330" y="10" width="140" height="100" rx="8" class="pcb"/><text x="456" y="64" class="lbl" text-anchor="end">OLED</text><text x="456" y="82" class="lbl-sm" text-anchor="end">0x3C</text>
+<rect x="330" y="140" width="140" height="100" rx="8" class="pcb"/><text x="456" y="194" class="lbl" text-anchor="end">MPU6050</text><text x="456" y="212" class="lbl-sm" text-anchor="end">0x68</text>
+<path d="M150 60 H240 V40 H330 M240 60 V170 H330" stroke="var(--w-sda)" stroke-width="4" fill="none" stroke-linejoin="round"/>
+<path d="M150 100 H270 V80 H330 M270 100 V210 H330" stroke="var(--w-scl)" stroke-width="4" fill="none" stroke-linejoin="round"/>
+<circle cx="240" cy="60" r="5" fill="var(--w-sda)"/><circle cx="270" cy="100" r="5" fill="var(--w-scl)"/>
+<circle cx="150" cy="60" r="6" class="pin"/><text x="140" y="64" class="lbl-sm" text-anchor="end">21 SDA</text>
+<circle cx="150" cy="100" r="6" class="pin"/><text x="140" y="104" class="lbl-sm" text-anchor="end">22 SCL</text>
+<circle cx="330" cy="40" r="6" class="pin"/><text x="340" y="44" class="lbl-sm">SDA</text><circle cx="330" cy="80" r="6" class="pin"/><text x="340" y="84" class="lbl-sm">SCL</text>
+<circle cx="330" cy="170" r="6" class="pin"/><text x="340" y="174" class="lbl-sm">SDA</text><circle cx="330" cy="210" r="6" class="pin"/><text x="340" y="214" class="lbl-sm">SCL</text>
+<text x="150" y="160" class="lbl-sm">Energía y GND como siempre:</text><text x="150" y="176" class="lbl-sm">3V3 y GND a los dos chips</text>
+</svg></div>
+      <h4 class="ch4">Configurar la comunicación, paso a paso</h4>
+      <ol class="csteps"><li><div class="cstep-n">1</div><div class="cstep-b"><h4>Crear el bus I2C una sola vez</h4><p>Un bus para los dos chips, con los pines del reloj y los datos.</p><div class="code"><span class="lang">python</span><pre>i2c = I2C(0, scl=Pin(22), sda=Pin(21), freq=400000)</pre></div></div></li><li><div class="cstep-n">2</div><div class="cstep-b"><h4>Buscar quién está conectado</h4><p><code>scan()</code> pregunta en todas las direcciones y devuelve las que contestan. Las da en decimal: 60 es 0x3C y 104 es 0x68.</p><div class="code"><span class="lang">python</span><pre>print(i2c.scan())   <span class="c-com"># [60, 104]</span></pre></div></div></li><li><div class="cstep-n">3</div><div class="cstep-b"><h4>Despertar el MPU6050</h4><p>Los chips I2C guardan su configuración en <strong>registros</strong>, cajitas numeradas. El MPU6050 arranca dormido: se despierta escribiendo 0 en su registro <code>0x6B</code>.</p><div class="code"><span class="lang">python</span><pre>i2c.writeto_mem(0x68, 0x6B, b<span class="c-str">"\x00"</span>)   <span class="c-com"># (dirección, registro, dato)</span></pre></div></div></li><li><div class="cstep-n">4</div><div class="cstep-b"><h4>Leer los datos</h4><p>La aceleración está en 6 bytes a partir del registro <code>0x3B</code>: dos por cada eje X, Y, Z.</p><div class="code"><span class="lang">python</span><pre>datos = i2c.readfrom_mem(0x68, 0x3B, 6)</pre></div></div></li><li><div class="cstep-n">5</div><div class="cstep-b"><h4>Convertir los bytes en números</h4><p>Cada eje viene en dos bytes que se juntan en un número con signo. Dividido entre 16384 da la aceleración en «g» (1 g es la gravedad).</p><div class="code"><span class="lang">python</span><pre>ax = con_signo(datos[0], datos[1]) / 16384</pre></div></div></li><li><div class="cstep-n">6</div><div class="cstep-b"><h4>Comprobar</h4><p>Mira la consola: debe imprimir <code>[60, 104]</code>. Pon un breakpoint en <code>mostrar(...)</code> y mira <code>ax</code> y <code>ay</code>. Para «inclinar» la varita, cambia <code>accelX</code> y <code>accelY</code> en <code>chips/2-mpu6050/diagram.json</code> y vuelve a iniciar la simulación.</p></div></li></ol>
+      <details class="full"><summary>Ver el archivo completo: <code>chips/2-mpu6050/varita.py</code></summary><div class="code"><span class="lang">python · varita.py</span><button class="copy" type="button">Copiar</button><pre><span class="c-com"># Chip 2 · MPU6050: la varita mágica.</span>
+<span class="c-com"># Protocolo I2C: comparte los cables SDA (21) y SCL (22) con la OLED.</span>
+<span class="c-com"># Cada chip tiene su dirección: OLED = 0x3C (60), MPU6050 = 0x68 (104).</span>
+<span class="c-kw">import</span> time
+<span class="c-kw">from</span> machine <span class="c-kw">import</span> Pin, I2C
+<span class="c-kw">import</span> ssd1306
+
+MPU = 0x68          <span class="c-com"># dirección del MPU6050 en el bus I2C</span>
+REG_ENCENDIDO = 0x6B  <span class="c-com"># registro PWR_MGMT_1: 0 = despierto</span>
+REG_ACELERACION = 0x3B  <span class="c-com"># aquí empiezan los 6 bytes de aceleración X, Y, Z</span>
+
+
+<span class="c-kw">def</span> preparar_bus():
+    <span class="c-kw">return</span> I2C(0, scl=Pin(22), sda=Pin(21), freq=400000)
+
+
+<span class="c-kw">def</span> despertar_mpu(i2c):
+    <span class="c-com"># Al encender, el MPU6050 está dormido: se despierta escribiendo 0 en su registro.</span>
+    i2c.writeto_mem(MPU, REG_ENCENDIDO, b<span class="c-str">"\x00"</span>)
+
+
+<span class="c-kw">def</span> con_signo(alto, bajo):
+    <span class="c-com"># Junta dos bytes en un número que puede ser negativo (−32768 a 32767).</span>
+    valor = (alto &lt;&lt; 8) | bajo
+    <span class="c-kw">if</span> valor &gt; 32767:
+        valor -= 65536
+    <span class="c-kw">return</span> valor
+
+
+<span class="c-kw">def</span> leer_aceleracion(i2c):
+    datos = i2c.readfrom_mem(MPU, REG_ACELERACION, 6)
+    ax = con_signo(datos[0], datos[1]) / 16384  <span class="c-com"># 16384 = 1 g en el rango de ±2 g</span>
+    ay = con_signo(datos[2], datos[3]) / 16384
+    az = con_signo(datos[4], datos[5]) / 16384
+    <span class="c-kw">return</span> ax, ay, az
+
+
+<span class="c-kw">def</span> mostrar(display, ax, ay):
+    display.fill(0)
+    display.text(<span class="c-str">"Varita magica"</span>, 12, 0, 1)
+    x = 60 + int(ax * 50)
+    y = 34 + int(ay * 20)
+    x = max(0, min(120, x))
+    y = max(12, min(56, y))
+    display.fill_rect(x, y, 8, 8, 1)  <span class="c-com"># el fantasma se mueve al inclinar</span>
+    display.show()
+
+
+<span class="c-kw">def</span> main():
+    i2c = preparar_bus()
+    print(<span class="c-str">"Chips encontrados:"</span>, i2c.scan())  <span class="c-com"># debería mostrar [60, 104]</span>
+    display = ssd1306.SSD1306_I2C(128, 64, i2c)
+    despertar_mpu(i2c)
+    <span class="c-kw">for</span> vuelta <span class="c-kw">in</span> range(100):
+        ax, ay, az = leer_aceleracion(i2c)
+        mostrar(display, ax, ay)  <span class="c-com"># breakpoint aquí para ver ax, ay</span>
+        time.sleep(0.2)
+
+
+<span class="c-kw">if</span> __name__ == <span class="c-str">"__main__"</span>:
+    main()</pre></div></details>
+      <div class="runbox"><b>Para probarlo:</b> en Wokwi, <strong>Select Config File</strong> → <code>chips/2-mpu6050/wokwi.toml</code> y <strong>Start Simulation</strong>. Luego, en Ejecutar y depurar, elige <strong>Chip 2 · MPU6050 varita — REMOTA GHI</strong>.</div>
+    </li>
+
+    <li class="blk pra">
+      <span class="kchip k-pra">Práctica · Chip 2</span>
+      <h3>¿Dónde está la varita?</h3>
+      <p class="meta">Usa: <code>i2c.scan()</code> · direcciones · <code>in</code></p>
+      <p>En <code>varita.py</code>, dentro de <code>main</code>, cambia la línea del <code>print</code> por esta comprobación:</p>
+      <div class="code"><span class="lang">python · varita.py</span><button class="copy" type="button">Copiar</button><pre>    chips = i2c.scan()
+    print(<span class="c-str">"Chips encontrados:"</span>, chips)
+    <span class="c-kw">if</span> <span class="blank">___</span> <span class="c-kw">not</span> <span class="c-kw">in</span> chips:
+        print(<span class="c-str">"No encuentro la varita: revisa SDA y SCL"</span>)</pre></div>
+      <div class="hints"><details><summary>Pista 1</summary><p>Busca la dirección del MPU6050: está guardada en una variable al principio del archivo.</p></details><details><summary>Pista 2</summary><p><code>x in lista</code> pregunta si x está en la lista; <code>not in</code>, si NO está.</p></details><details><summary>Pista 3</summary><p>Para probar que funciona, en <code>diagram.json</code> borra la conexión de <code>imu1:SDA</code> y vuelve a iniciar.</p></details></div>
+      <p class="check"><strong>Comprueba:</strong> con todo conectado no aparece el aviso; sin el cable SDA del MPU6050, sí. Reto: haz que el fantasma se mueva al revés cuando inclinas.</p>
+      <label class="ex-done"><input type="checkbox" id="chip-2"><span>¡Lo logré!</span></label>
+    </li>
+
+    <li class="blk con">
+      <span class="kchip k-con">Concepto nuevo · SPI</span>
+      <h3>Chip 3 · MAX7219, la calabaza de LEDs</h3>
+      <p>El MAX7219 controla una matriz de <strong>8 × 8 LEDs</strong>. Habla SPI: un cable de reloj, uno de datos y uno llamado <strong>CS</strong> que funciona como levantar la mano: mientras está en 0, el chip escucha.</p>
+      <div class="chip-conn"><svg class="mini-svg" viewBox="0 0 480 210" role="img" aria-label="Cableado del MAX7219: VCC a 5V, GND, DIN al 23, CLK al 18 y CS al 5"><rect x="10" y="10" width="140" height="190" rx="8" class="pcb"/><text x="24" y="109" class="lbl">ESP32</text><rect x="330" y="10" width="140" height="190" rx="8" class="pcb"/><text x="456" y="109" class="lbl" text-anchor="end">MAX7219</text><line x1="150" y1="36" x2="330" y2="36" stroke="var(--w-vcc)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="36" r="6" class="pin"/><text x="140" y="40" class="lbl-sm" text-anchor="end">5V</text><circle cx="330" cy="36" r="6" class="pin"/><text x="340" y="40" class="lbl-sm">VCC</text><line x1="150" y1="70" x2="330" y2="70" stroke="var(--w-gnd)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="70" r="6" class="pin"/><text x="140" y="74" class="lbl-sm" text-anchor="end">GND</text><circle cx="330" cy="70" r="6" class="pin"/><text x="340" y="74" class="lbl-sm">GND</text><line x1="150" y1="104" x2="330" y2="104" stroke="var(--w-sda)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="104" r="6" class="pin"/><text x="140" y="108" class="lbl-sm" text-anchor="end">23</text><circle cx="330" cy="104" r="6" class="pin"/><text x="340" y="108" class="lbl-sm">DIN</text><line x1="150" y1="138" x2="330" y2="138" stroke="var(--w-scl)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="138" r="6" class="pin"/><text x="140" y="142" class="lbl-sm" text-anchor="end">18</text><circle cx="330" cy="138" r="6" class="pin"/><text x="340" y="142" class="lbl-sm">CLK</text><line x1="150" y1="172" x2="330" y2="172" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="172" r="6" class="pin"/><text x="140" y="176" class="lbl-sm" text-anchor="end">5</text><circle cx="330" cy="172" r="6" class="pin"/><text x="340" y="176" class="lbl-sm">CS</text></svg><ul class="wiring"><li><span class="sw-dot" style="background:var(--w-vcc)"></span>VCC → <b>5V</b></li><li><span class="sw-dot" style="background:var(--w-gnd)"></span>GND → <b>GND</b></li><li><span class="sw-dot" style="background:var(--w-sda)"></span>DIN → <b>23</b></li><li><span class="sw-dot" style="background:var(--w-scl)"></span>CLK → <b>18</b></li><li><span class="sw-dot" style="background:var(--accent)"></span>CS → <b>5</b></li></ul></div>
+      <h4 class="ch4">Configurar la comunicación, paso a paso</h4>
+      <ol class="csteps"><li><div class="cstep-n">1</div><div class="cstep-b"><h4>Crear el bus SPI</h4><p>Se indica el reloj (<code>sck</code>) y los datos de salida (<code>mosi</code>). La velocidad es cuántos bits por segundo se envían.</p><div class="code"><span class="lang">python</span><pre>spi = SPI(2, baudrate=1000000, sck=Pin(18), mosi=Pin(23))</pre></div></div></li><li><div class="cstep-n">2</div><div class="cstep-b"><h4>Preparar el pin CS</h4><p>CS empieza en 1: «no te estoy hablando».</p><div class="code"><span class="lang">python</span><pre>cs = Pin(5, Pin.OUT, value=1)</pre></div></div></li><li><div class="cstep-n">3</div><div class="cstep-b"><h4>Hablar con el chip</h4><p>Cada orden son dos bytes: el número del registro y su valor, siempre entre bajar y subir CS.</p><div class="code"><span class="lang">python</span><pre>cs.value(0)                          <span class="c-com"># levantar la mano</span>
+spi.write(bytes([registro, valor]))  <span class="c-com"># enviar la orden</span>
+cs.value(1)                          <span class="c-com"># el chip la guarda</span></pre></div></div></li><li><div class="cstep-n">4</div><div class="cstep-b"><h4>Encender y configurar</h4><p>Al arrancar se le dice cómo trabajar: usar las 8 filas, dibujar punto por punto, el brillo, y encender.</p><div class="code"><span class="lang">python</span><pre>escribir(spi, cs, 0x0B, 7)   <span class="c-com"># usar las 8 filas</span>
+escribir(spi, cs, 0x09, 0)   <span class="c-com"># punto por punto</span>
+escribir(spi, cs, 0x0A, 3)   <span class="c-com"># brillo (0 a 15)</span>
+escribir(spi, cs, 0x0C, 1)   <span class="c-com"># encender</span></pre></div></div></li><li><div class="cstep-n">5</div><div class="cstep-b"><h4>Dibujar</h4><p>Las filas son los registros 1 a 8. Cada fila es un número binario: cada <code>1</code> es un LED encendido.</p><div class="code"><span class="lang">python</span><pre>escribir(spi, cs, 1, 0b00011000)   <span class="c-com"># fila 1: dos LEDs en el centro</span></pre></div></div></li><li><div class="cstep-n">6</div><div class="cstep-b"><h4>Comprobar</h4><p>Pon un breakpoint en <code>dibujar(...)</code> y avanza con <kbd>F5</kbd>: la matriz cambia entre calabaza y fantasma. Si el dibujo sale girado o como en un espejo, es por cómo está montada la matriz: prueba <code>"layout": "fc16"</code> en los <code>attrs</code> de la matriz en <code>diagram.json</code>.</p></div></li></ol>
+      <details class="full"><summary>Ver el archivo completo: <code>chips/3-max7219/calabaza_leds.py</code></summary><div class="code"><span class="lang">python · calabaza_leds.py</span><button class="copy" type="button">Copiar</button><pre><span class="c-com"># Chip 3 · MAX7219: la calabaza de LEDs (matriz de 8 × 8).</span>
+<span class="c-com"># Protocolo SPI: reloj (18), datos (23) y un pin de "te hablo a ti" llamado CS (5).</span>
+<span class="c-kw">import</span> time
+<span class="c-kw">from</span> machine <span class="c-kw">import</span> Pin, SPI
+
+REG_DECODIFICAR = 0x09  <span class="c-com"># 0 = dibujamos punto por punto, sin números automáticos</span>
+REG_BRILLO = 0x0A       <span class="c-com"># de 0 (tenue) a 15 (máximo)</span>
+REG_FILAS = 0x0B        <span class="c-com"># cuántas filas usar: 7 = las 8 (de 0 a 7)</span>
+REG_ENCENDIDO = 0x0C    <span class="c-com"># 1 = encendido</span>
+REG_PRUEBA = 0x0F       <span class="c-com"># 1 = enciende todo para probar</span>
+
+CALABAZA = [
+    0b00011000,
+    0b01111110,
+    0b11111111,
+    0b10111101,
+    0b11111111,
+    0b10100101,
+    0b11011011,
+    0b01111110,
+]
+
+FANTASMA = [
+    0b00111100,
+    0b01111110,
+    0b11011011,
+    0b11111111,
+    0b11111111,
+    0b11111111,
+    0b11111111,
+    0b10101010,
+]
+
+
+<span class="c-kw">def</span> preparar_spi():
+    spi = SPI(2, baudrate=1000000, sck=Pin(18), mosi=Pin(23))
+    cs = Pin(5, Pin.OUT, value=1)  <span class="c-com"># CS en 1 = "no te estoy hablando"</span>
+    <span class="c-kw">return</span> spi, cs
+
+
+<span class="c-kw">def</span> escribir(spi, cs, registro, valor):
+    cs.value(0)                       <span class="c-com"># 1. levantar la mano: "te hablo a ti"</span>
+    spi.write(bytes([registro, valor]))  <span class="c-com"># 2. enviar dirección del registro y valor</span>
+    cs.value(1)                       <span class="c-com"># 3. bajar la mano: el chip guarda el dato</span>
+
+
+<span class="c-kw">def</span> iniciar(spi, cs):
+    escribir(spi, cs, REG_PRUEBA, 0)
+    escribir(spi, cs, REG_FILAS, 7)
+    escribir(spi, cs, REG_DECODIFICAR, 0)
+    escribir(spi, cs, REG_BRILLO, 3)
+    escribir(spi, cs, REG_ENCENDIDO, 1)
+
+
+<span class="c-kw">def</span> dibujar(spi, cs, filas):
+    <span class="c-kw">for</span> numero <span class="c-kw">in</span> range(8):
+        escribir(spi, cs, numero + 1, filas[numero])  <span class="c-com"># las filas son los registros 1 a 8</span>
+
+
+<span class="c-kw">def</span> main():
+    spi, cs = preparar_spi()
+    iniciar(spi, cs)
+    <span class="c-kw">for</span> vez <span class="c-kw">in</span> range(6):
+        dibujar(spi, cs, CALABAZA)  <span class="c-com"># breakpoint aquí</span>
+        time.sleep(1)
+        dibujar(spi, cs, FANTASMA)
+        time.sleep(1)
+    print(<span class="c-str">"Fin del espectáculo"</span>)
+
+
+<span class="c-kw">if</span> __name__ == <span class="c-str">"__main__"</span>:
+    main()</pre></div></details>
+      <div class="runbox"><b>Para probarlo:</b> en Wokwi, <strong>Select Config File</strong> → <code>chips/3-max7219/wokwi.toml</code> y <strong>Start Simulation</strong>. Luego, en Ejecutar y depurar, elige <strong>Chip 3 · MAX7219 calabaza — REMOTA GHI</strong>.</div>
+    </li>
+
+    <li class="blk pra">
+      <span class="kchip k-pra">Práctica · Chip 3</span>
+      <h3>Dibuja un murciélago</h3>
+      <p class="meta">Usa: números binarios · <code>dibujar</code> · brillo</p>
+      <p>Añade esta figura debajo de <code>FANTASMA</code> y complétala. Dibújala antes en papel en una cuadrícula de 8 × 8.</p>
+      <div class="code"><span class="lang">python · calabaza_leds.py</span><button class="copy" type="button">Copiar</button><pre>MURCIELAGO = [
+    0b00000000,
+    0b10000001,
+    0b11000011,
+    0b11111111,
+    0b<span class="blank">___</span>,      <span class="c-com"># cuerpo: 8 cifras, 1 = encendido</span>
+    0b00100100,
+    0b00000000,
+    0b00000000,
+]</pre></div>
+      <p>Luego, en <code>main</code>, añade <code>dibujar(spi, cs, MURCIELAGO)</code> y un <code>time.sleep(1)</code> dentro del <code>for</code>, y cambia el brillo:</p>
+      <div class="code"><span class="lang">python · calabaza_leds.py</span><button class="copy" type="button">Copiar</button><pre>    escribir(spi, cs, REG_BRILLO, <span class="blank">___</span>)   <span class="c-com"># de 0 a 15</span></pre></div>
+      <div class="hints"><details><summary>Pista 1</summary><p>Cada fila tiene exactamente 8 cifras, solo ceros y unos.</p></details><details><summary>Pista 2</summary><p>El cuerpo del murciélago va en el centro: los LEDs de los extremos de esa fila, apagados.</p></details><details><summary>Pista 3</summary><p>Para el brillo, cualquier número de 0 a 15. ¿Se nota la diferencia entre 1 y 15?</p></details></div>
+      <p class="check"><strong>Comprueba:</strong> aparecen calabaza, fantasma y murciélago. ¿Qué pasa si una fila tiene 9 cifras?</p>
+      <label class="ex-done"><input type="checkbox" id="chip-3"><span>¡Lo logré!</span></label>
+    </li>
+
+    <li class="blk con">
+      <span class="kchip k-con">Concepto nuevo · UART</span>
+      <h3>Chip 4 · UART, el mensaje secreto</h3>
+      <p>UART (puerto serie) es como un teléfono: <strong>TX habla y RX escucha</strong>. Entre dos placas se cruzan: el TX de una va al RX de la otra, y comparten GND. Es el mismo idioma con el que el ESP32 te manda los <code>print()</code>. En este circuito hay un solo ESP32, así que el cable sale por el 17 y vuelve a entrar por el 16: <strong>el ESP32 se habla a sí mismo</strong>.</p>
+      <div class="chip-conn"><svg class="mini-svg" viewBox="0 0 480 74" role="img" aria-label="Un cable del pin 17 (TX) al pin 16 (RX) del mismo ESP32"><rect x="10" y="10" width="140" height="54" rx="8" class="pcb"/><text x="24" y="41" class="lbl">ESP32</text><rect x="330" y="10" width="140" height="54" rx="8" class="pcb"/><text x="456" y="41" class="lbl" text-anchor="end">ESP32</text><line x1="150" y1="36" x2="330" y2="36" stroke="var(--k-teo)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="36" r="6" class="pin"/><text x="140" y="40" class="lbl-sm" text-anchor="end">17 TX</text><circle cx="330" cy="36" r="6" class="pin"/><text x="340" y="40" class="lbl-sm">16 RX</text></svg><ul class="wiring"><li><span class="sw-dot" style="background:var(--k-teo)"></span>16 RX → <b>17 TX</b></li></ul></div>
+      <h4 class="ch4">Configurar la comunicación, paso a paso</h4>
+      <ol class="csteps"><li><div class="cstep-n">1</div><div class="cstep-b"><h4>Crear el puerto serie</h4><p>Se elige el UART 2 (el 0 lo usa el PC), la velocidad y los pines. Los dos lados <strong>tienen que usar la misma velocidad</strong>; si no, llegan letras sin sentido.</p><div class="code"><span class="lang">python</span><pre>uart = UART(2, baudrate=9600, tx=17, rx=16)</pre></div></div></li><li><div class="cstep-n">2</div><div class="cstep-b"><h4>Enviar</h4><p><code>write</code> manda el texto letra por letra por el cable TX.</p><div class="code"><span class="lang">python</span><pre>uart.write(<span class="c-str">"BOO"</span>)</pre></div></div></li><li><div class="cstep-n">3</div><div class="cstep-b"><h4>Esperar y comprobar si llegó algo</h4><p><code>any()</code> dice cuántos bytes están esperando en RX.</p><div class="code"><span class="lang">python</span><pre>time.sleep(0.1)
+<span class="c-kw">if</span> uart.any():
+    mensaje = uart.read().decode()   <span class="c-com"># bytes → texto</span></pre></div></div></li><li><div class="cstep-n">4</div><div class="cstep-b"><h4>Comprobar</h4><p>Pon un breakpoint en <code>mostrar(...)</code> y compara <code>palabra</code> con <code>llegada</code> en Variables. La OLED muestra lo enviado y lo recibido.</p></div></li></ol>
+      <details class="full"><summary>Ver el archivo completo: <code>chips/4-uart/mensaje_secreto.py</code></summary><div class="code"><span class="lang">python · mensaje_secreto.py</span><button class="copy" type="button">Copiar</button><pre><span class="c-com"># Chip 4 · UART: el mensaje secreto.</span>
+<span class="c-com"># Protocolo UART (puerto serie): un cable para enviar (TX, 17) y otro para recibir (RX, 16).</span>
+<span class="c-com"># En este circuito el cable sale del 17 y vuelve a entrar por el 16: el ESP32 se habla a sí mismo.</span>
+<span class="c-com"># Con dos placas reales, el TX de una va al RX de la otra (y comparten GND).</span>
+<span class="c-kw">import</span> time
+<span class="c-kw">from</span> machine <span class="c-kw">import</span> Pin, I2C, UART
+<span class="c-kw">import</span> ssd1306
+
+
+<span class="c-kw">def</span> preparar_pantalla():
+    i2c = I2C(0, scl=Pin(22), sda=Pin(21), freq=400000)
+    <span class="c-kw">return</span> ssd1306.SSD1306_I2C(128, 64, i2c)
+
+
+<span class="c-kw">def</span> preparar_uart():
+    <span class="c-com"># UART 2, velocidad 9600 bits por segundo. Los dos lados deben usar la MISMA velocidad.</span>
+    <span class="c-kw">return</span> UART(2, baudrate=9600, tx=17, rx=16)
+
+
+<span class="c-kw">def</span> enviar(uart, texto):
+    uart.write(texto)
+
+
+<span class="c-kw">def</span> recibir(uart):
+    time.sleep(0.1)  <span class="c-com"># dar tiempo a que lleguen las letras</span>
+    <span class="c-kw">if</span> uart.any():
+        <span class="c-kw">return</span> uart.read().decode()
+    <span class="c-kw">return</span> <span class="c-str">""</span>
+
+
+<span class="c-kw">def</span> mostrar(display, enviado, recibido):
+    display.fill(0)
+    display.text(<span class="c-str">"Mensaje secreto"</span>, 4, 0, 1)
+    display.text(<span class="c-str">"Envie: "</span> + enviado, 0, 24, 1)
+    display.text(<span class="c-str">"Llego: "</span> + recibido, 0, 40, 1)
+    display.show()
+
+
+<span class="c-kw">def</span> main():
+    display = preparar_pantalla()
+    uart = preparar_uart()
+    <span class="c-kw">for</span> palabra <span class="c-kw">in</span> [<span class="c-str">"BOO"</span>, <span class="c-str">"Dulce"</span>, <span class="c-str">"Truco"</span>]:
+        enviar(uart, palabra)
+        llegada = recibir(uart)
+        mostrar(display, palabra, llegada)  <span class="c-com"># breakpoint aquí</span>
+        time.sleep(1)
+
+
+<span class="c-kw">if</span> __name__ == <span class="c-str">"__main__"</span>:
+    main()</pre></div></details>
+      <div class="runbox"><b>Para probarlo:</b> en Wokwi, <strong>Select Config File</strong> → <code>chips/4-uart/wokwi.toml</code> y <strong>Start Simulation</strong>. Luego, en Ejecutar y depurar, elige <strong>Chip 4 · UART mensaje secreto — REMOTA GHI</strong>.</div>
+    </li>
+
+    <li class="blk pra">
+      <span class="kchip k-pra">Práctica · Chip 4</span>
+      <h3>Corta la línea</h3>
+      <p class="meta">Usa: <code>uart.write</code> · listas · el cable TX → RX</p>
+      <p>En <code>mensaje_secreto.py</code>, añade tu propia palabra a la lista:</p>
+      <div class="code"><span class="lang">python · mensaje_secreto.py</span><button class="copy" type="button">Copiar</button><pre>    <span class="c-kw">for</span> palabra <span class="c-kw">in</span> [<span class="c-str">"BOO"</span>, <span class="c-str">"Dulce"</span>, <span class="c-str">"Truco"</span>, <span class="blank">___</span>]:</pre></div>
+      <div class="hints"><details><summary>Pista 1</summary><p>La palabra va entre comillas. Recuerda el límite: «Envie: » ya ocupa 7 letras de las 16.</p></details><details><summary>Pista 2</summary><p>Después, abre <code>chips/4-uart/diagram.json</code>, borra la conexión <code>esp:17</code> → <code>esp:16</code> y vuelve a iniciar. Predice antes qué mostrará «Llego:».</p></details></div>
+      <p class="check"><strong>Comprueba:</strong> tu palabra aparece en «Envie» y en «Llego». Sin el cable, ¿qué llega? ¿Por qué el programa no se queda esperando para siempre?</p>
+      <label class="ex-done"><input type="checkbox" id="chip-4"><span>¡Lo logré!</span></label>
+    </li>
+
+    <li class="blk pra final">
+      <span class="kchip k-pra">Reto final de chips</span>
+      <h3>La casa embrujada</h3>
+      <p>Con tu tutor, diseña un circuito con <strong>DHT22 y MAX7219 a la vez</strong>: si hace calor, la matriz muestra la calabaza; si hace frío, el fantasma. Antes de programar, haz la tabla de pines: ¿alguno se repite? Revisa el <a href="#mapa-pines">mapa de pines</a> para elegir.</p>
+      <label class="ex-done"><input type="checkbox" id="chip-5"><span>¡Lo logré!</span></label>
+    </li>
+  </ol>
+  <p class="note">Estos circuitos y programas se prepararon con la misma configuración de la demo, pero aún no se han probado en tu Wokwi. Si algo no responde, revisa primero los cables con la receta de 5 pasos y avisa a tu tutor con el mensaje completo.</p>
+</section>
+
 <footer class="sources">
   <strong>Enlaces</strong>
   <ul>
-    <li>Archivos: <a href="https://github.com/Cassers/luka-wokwi-oled-debug">Cassers/luka-wokwi-oled-debug</a> · <a href="https://github.com/Cassers/luka-wokwi-oled-debug/blob/main/MicroPython-debug/practica.py">practica.py</a> · <a href="https://github.com/Cassers/luka-wokwi-oled-debug/blob/main/MicroPython-debug/oled_demo.py">oled_demo.py</a>.</li>
+    <li>Archivos: <a href="https://github.com/Cassers/luka-wokwi-oled-debug">Cassers/luka-wokwi-oled-debug</a> · <a href="https://github.com/Cassers/luka-wokwi-oled-debug/tree/main/chips">carpeta chips</a> · <a href="https://github.com/Cassers/luka-wokwi-oled-debug/blob/main/MicroPython-debug/practica.py">practica.py</a> · <a href="https://github.com/Cassers/luka-wokwi-oled-debug/blob/main/MicroPython-debug/oled_demo.py">oled_demo.py</a>.</li>
     <li><a href="https://docs.micropython.org/en/latest/library/framebuf.html">MicroPython: funciones de dibujo (framebuf)</a> · <a href="https://docs.wokwi.com/vscode/getting-started">Wokwi para VS Code</a>.</li>
     <li>La depuración remota GHI + Wokwi es experimental: si algo raro pasa, avisa a tu tutor con el mensaje completo.</li>
   </ul>
