@@ -9,45 +9,36 @@
 <title>Guía OLED de Luka</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Silkscreen&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Silkscreen&family=Creepster&display=swap">
 <style>
-/* Layout: banco de trabajo — hero con la OLED simulada, luego riel de pasos (sticky en escritorio) + columna de lectura */
+/* Layout: noche de Halloween (un solo tema oscuro, elegido a propósito) — hero con la OLED y murciélagos, pines, riel de pasos + lectura, ruta de práctica en línea de tiempo */
 :root {
-  --bg: #f3f5f4;
-  --surface: #ffffff;
-  --ink: #17221f;
-  --muted: #586863;
-  --line: #d6dfdc;
-  --accent: #0d7a6a;        /* verde soldermask */
-  --accent-soft: #e0f1ed;
-  --amber: #b86b00;         /* checkpoint / pide confirmación */
-  --amber-soft: #fbf0dc;
-  --danger: #b3261e;
-  --code-bg: #14201d;
-  --code-ink: #d9efe8;
-  --oled-bg: #050807;
-  --oled-px: #9fe7ff;
-  --board: #1e3a34;
-  --board-ink: #cfe3dd;
-  --w-vcc: #d1342b; --w-gnd: #1f2523; --w-sda: #1f9a4b; --w-scl: #2f6fd6;
+  --bg: #110b1a;
+  --surface: #1b1327;
+  --ink: #f4ecdf;
+  --muted: #b8a8c8;
+  --line: #33264a;
+  --accent: #ff8a1f;        /* calabaza */
+  --accent-soft: #3a2216;
+  --amber: #9be15d;         /* checkpoint: verde baba */
+  --amber-soft: #1d2a17;
+  --danger: #ff5d73;
+  --code-bg: #0a0610;
+  --code-ink: #efe6ff;
+  --oled-bg: #030205;
+  --oled-px: #b8f3ff;
+  --board: #2a1d3d;
+  --board-ink: #e6dbf3;
+  --w-vcc: #ff6b5e; --w-gnd: #c9d2cf; --w-sda: #4cd27e; --w-scl: #6aa2ff;
+  --bat: #5a4280;
+  --web: rgba(220, 210, 240, .45);
+  --k-teo: #b48cff; --k-con: #ff8a1f; --k-pro: #9be15d; --k-pra: #ffd23f;
+  --f-spooky: "Creepster", "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   --f-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
   --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   --f-pixel: "Silkscreen", "JetBrains Mono", monospace;
   --r: 10px;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0f1614; --surface: #16201d; --ink: #e4ece9; --muted: #9db0aa; --line: #2a3834;
-    --accent: #4fc9b2; --accent-soft: #173a33; --amber: #f0b24a; --amber-soft: #3a2c12; --danger: #ff8a80;
-    --code-bg: #0a100e; --code-ink: #d9efe8; --oled-bg: #020403; --oled-px: #9fe7ff; --board: #12302a; --w-vcc: #ff6b5e; --w-gnd: #c9d2cf; --w-sda: #4cd27e; --w-scl: #6aa2ff;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0f1614; --surface: #16201d; --ink: #e4ece9; --muted: #9db0aa; --line: #2a3834;
-  --accent: #4fc9b2; --accent-soft: #173a33; --amber: #f0b24a; --amber-soft: #3a2c12; --danger: #ff8a80;
-  --code-bg: #0a100e; --code-ink: #d9efe8; --oled-bg: #020403; --oled-px: #9fe7ff; --board: #12302a; --w-vcc: #ff6b5e; --w-gnd: #c9d2cf; --w-sda: #4cd27e; --w-scl: #6aa2ff;
   color-scheme: dark;
 }
 
@@ -119,7 +110,7 @@ h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; line-height: 1.1
 .diagram figcaption { color: var(--muted); font-size: .88rem; margin-top: 8px; }
 .diagram .pcb { fill: var(--board); }
 .diagram .screen { fill: var(--oled-bg); }
-.diagram .chip { fill: #2c3b37; stroke: #4c625c; }
+.diagram .chip { fill: #1d1430; stroke: #4a3a62; }
 .diagram .usb { fill: #9aa7a3; }
 .diagram .px { font-family: var(--f-pixel); font-size: 13px; fill: var(--oled-px); }
 .diagram .lbl { font-family: var(--f-mono); font-size: 14px; font-weight: 600; fill: var(--board-ink); }
@@ -197,13 +188,13 @@ h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; line-height: 1.1
   margin: 0; background: var(--code-bg); color: var(--code-ink); border-radius: 8px; padding: 16px 18px; overflow-x: auto;
   font-family: var(--f-mono); font-size: .84rem; line-height: 1.55;
 }
-.code .lang { position: absolute; top: 8px; left: 14px; font-family: var(--f-mono); font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; color: #7fa59b; }
+.code .lang { position: absolute; top: 8px; left: 14px; font-family: var(--f-mono); font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; color: #9d8bb8; }
 .code pre { padding-top: 30px; }
 .copy {
   position: absolute; top: 6px; right: 8px; font: 600 .72rem var(--f-mono); padding: 4px 9px; border-radius: 5px; cursor: pointer;
-  background: #24342f; color: #d9efe8; border: 1px solid #36504a;
+  background: #2a1f38; color: #efe6ff; border: 1px solid #4a3a62;
 }
-.c-com { color: #7fa59b; }
+.c-com { color: #9d8bb8; }
 .c-kw { color: #ffb86b; }
 .c-str { color: #9fe7ff; }
 
@@ -278,13 +269,123 @@ td:first-child { width: 34%; font-weight: 700; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
 html { scroll-behavior: smooth; }
+/* ---------- Halloween: tipografía y atmósfera ---------- */
+.hero h1, .section-title, .pins-sec > h2, .contract h2 { font-family: var(--f-spooky); font-weight: 400; letter-spacing: .03em; }
+.hero h1 { font-size: clamp(2.3rem, 5.4vw, 3.9rem); line-height: 1.05; text-shadow: 0 0 22px rgba(255,138,31,.25); }
+.hero h1 em { text-shadow: 0 0 18px rgba(255,138,31,.7); }
+.section-title, .pins-sec > h2 { font-size: clamp(1.8rem, 3.6vw, 2.4rem); color: var(--accent); }
+.hero { position: relative; isolation: isolate; }
+.hero > * { position: relative; z-index: 1; }
+.night { position: absolute !important; inset: 0; z-index: 0 !important; overflow: hidden; pointer-events: none; }
+.moon { position: absolute; top: 18px; right: 38%; width: 86px; height: 86px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff6dc 0 40%, #f6d588 70%, #e2b25c 100%);
+  box-shadow: 0 0 40px 10px rgba(246,213,136,.28); animation: moonglow 6s ease-in-out infinite; opacity: .9; }
+.moon::after { content: ""; position: absolute; width: 16px; height: 16px; border-radius: 50%; background: rgba(160,120,60,.25); top: 46px; left: 24px; box-shadow: 26px -18px 0 -3px rgba(160,120,60,.22); }
+.bat { position: absolute; width: 46px; color: var(--bat); left: -60px; animation: fly 14s linear infinite; }
+.bat svg { display: block; width: 100%; height: auto; animation: flap .28s ease-in-out infinite alternate; transform-origin: 50% 40%; }
+.bat.b1 { top: 22%; }
+.bat.b2 { top: 8%; width: 32px; animation-duration: 19s; animation-delay: -7s; }
+.bat.b3 { top: 40%; width: 26px; animation-duration: 23s; animation-delay: -15s; }
+.fog { position: absolute; bottom: -40px; width: 70%; height: 120px; border-radius: 50%; background: radial-gradient(closest-side, rgba(180,140,255,.16), transparent); filter: blur(6px); animation: drift 18s ease-in-out infinite alternate; }
+.fog.f1 { left: -10%; } .fog.f2 { right: -15%; animation-duration: 24s; animation-direction: alternate-reverse; }
+.spider { position: absolute; top: 0; right: 4%; width: 2px; height: 46px; background: var(--web); transform-origin: top center; animation: dangle 4.5s ease-in-out infinite; }
+.spider svg { position: absolute; bottom: -18px; left: -11px; width: 24px; height: 24px; }
+.ghost { position: absolute; left: -26px; bottom: -22px; width: 54px; z-index: 2; animation: float 4s ease-in-out infinite; filter: drop-shadow(0 0 10px rgba(255,255,255,.35)); }
+.board .oled { animation: flicker 7s steps(1) infinite; }
+.web-corner { position: absolute; top: 0; left: 0; width: 120px; opacity: .5; }
+.tag-spooky { color: var(--accent); }
+
+/* tarjetas con brillo de calabaza */
+.step, .rule, .wire, .blk { transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+.step:hover, .blk:hover { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); box-shadow: 0 14px 34px -22px var(--accent); }
+.done-btn[aria-pressed="true"] { animation: pop .45s ease; }
+.bar i { background: repeating-linear-gradient(135deg, #ffd23f 0 8px, var(--accent) 8px 16px, #fff1d6 16px 24px); background-size: 34px 34px; animation: candy 1.2s linear infinite; }
+
+/* cables con corriente animada */
+.diagram .flow { fill: none; stroke: rgba(255,255,255,.85); stroke-width: 2; stroke-dasharray: 2 14; stroke-linecap: round; }
+.diagram .flow.toward { animation: flowback 1.2s linear infinite; }
+.diagram .flow.away { animation: flowfwd 1.2s linear infinite; }
+
+/* ---------- Ruta de práctica ---------- */
+.ruta-sec { padding-top: 8px; }
+.how { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px; margin-bottom: 18px; }
+.how .inner { margin: 6px 0 0; padding-left: 1.2em; color: var(--muted); }
+.how .tutor { border-style: dashed; border-color: var(--k-teo); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; list-style: none; padding: 0; margin: 0 0 22px; color: var(--muted); font-size: .9rem; }
+.legend li { display: flex; align-items: center; gap: 8px; }
+.kchip { display: inline-block; font-family: var(--f-mono); font-size: .7rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; color: #170f22; }
+.k-teo { background: var(--k-teo); } .k-con { background: var(--k-con); } .k-pro { background: var(--k-pro); } .k-pra { background: var(--k-pra); }
+.ruta { list-style: none; margin: 0; padding: 0 0 0 34px; position: relative; display: grid; gap: 18px; }
+.ruta::before { content: ""; position: absolute; left: 11px; top: 8px; bottom: 8px; width: 2px; background: repeating-linear-gradient(to bottom, var(--line) 0 8px, transparent 8px 14px); }
+.blk { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px 22px; min-width: 0; }
+.blk::before { content: ""; position: absolute; left: -31px; top: 22px; width: 18px; height: 18px; border-radius: 50%; border: 3px solid var(--bg); }
+.blk.teo::before { background: var(--k-teo); } .blk.con::before { background: var(--k-con); } .blk.pro::before { background: var(--k-pro); }
+.blk.pra::before { width: 22px; height: 20px; left: -33px; border: 0; border-radius: 45% 45% 40% 40%; background: radial-gradient(circle at 50% 60%, #ffb347, var(--accent) 70%); box-shadow: 0 0 10px rgba(255,138,31,.55); }
+.blk.pra::after { content: ""; position: absolute; left: -24px; top: 18px; width: 4px; height: 6px; background: #5c8a2e; border-radius: 2px; }
+.blk.teo, .blk.con, .blk.pro { background: transparent; }
+.blk h3 { font-size: 1.25rem; margin: 10px 0 8px; }
+.blk p { margin: 0 0 10px; max-width: 70ch; }
+.blk .meta { color: var(--muted); font-size: .9rem; }
+.blk .meta:empty { display: none; }
+.split { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 20px; align-items: center; }
+.grid-svg { width: 100%; max-width: 340px; height: auto; }
+.g-screen { fill: var(--oled-bg); stroke: var(--line); }
+.g-lines path { stroke: rgba(159,231,255,.14); stroke-width: 1; fill: none; }
+.g-dot { fill: var(--accent); }
+.g-lbl { font-family: var(--f-mono); font-size: 11px; fill: var(--muted); }
+.g-arrow { stroke: var(--k-pro); stroke-width: 2; fill: none; }
+.g-px { font-family: var(--f-pixel); font-size: 14px; fill: var(--oled-px); }
+.formula { font-family: var(--f-mono); font-size: 1rem; padding: 10px 14px; margin: 4px 0 12px; border-radius: 8px; background: var(--accent-soft); color: var(--ink); display: inline-block; max-width: 100%; overflow-wrap: anywhere; }
+.blank { display: inline-block; min-width: 2.2em; text-align: center; background: rgba(255,138,31,.22); color: #ffb35c; border-bottom: 2px dashed #ff8a1f; border-radius: 3px; animation: blink 1.6s ease-in-out infinite; }
+.hints { display: grid; gap: 8px; margin: 0 0 12px; }
+.hints details { border: 1px dashed var(--line); border-radius: 8px; padding: 8px 12px; }
+.hints summary { cursor: pointer; font-weight: 700; color: var(--k-teo); }
+.hints details p { margin: 8px 0 0; color: var(--muted); }
+.check { background: var(--amber-soft); border-radius: 8px; padding: 10px 14px; }
+.ex-done { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 700; }
+.ex-done input { width: 20px; height: 20px; accent-color: var(--accent); }
+.ex-done input:checked + span { color: var(--k-pra); animation: pop .45s ease; display: inline-block; }
+.blk.final { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 0 40px -18px var(--accent); }
+
+@keyframes fly { 0% { transform: translate(0, 0); } 25% { transform: translate(30vw, -18px); } 50% { transform: translate(60vw, 14px); } 75% { transform: translate(90vw, -10px); } 100% { transform: translate(125vw, 6px); } }
+@keyframes flap { from { transform: scaleY(1); } to { transform: scaleY(.45); } }
+@keyframes drift { from { transform: translateX(-4%); } to { transform: translateX(6%); } }
+@keyframes dangle { 0%, 100% { height: 30px; transform: rotate(-3deg); } 50% { height: 58px; transform: rotate(3deg); } }
+@keyframes float { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-10px) rotate(4deg); } }
+@keyframes moonglow { 0%, 100% { box-shadow: 0 0 34px 8px rgba(246,213,136,.24); } 50% { box-shadow: 0 0 56px 16px rgba(246,213,136,.36); } }
+@keyframes flicker { 0%, 100% { opacity: 1; } 91% { opacity: 1; } 92% { opacity: .55; } 93% { opacity: 1; } 95% { opacity: .7; } 96% { opacity: 1; } }
+@keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.15) rotate(-3deg); } 100% { transform: scale(1); } }
+@keyframes candy { to { background-position: 34px 0; } }
+@keyframes flowfwd { to { stroke-dashoffset: -16; } }
+@keyframes flowback { to { stroke-dashoffset: 16; } }
+@keyframes blink { 0%, 100% { background: rgba(255,138,31,.22); } 50% { background: rgba(255,138,31,.42); } }
+
+@media (max-width: 900px) {
+  .how, .split { grid-template-columns: minmax(0, 1fr); }
+  .moon { right: 8%; width: 60px; height: 60px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bat, .bat svg, .fog, .spider, .ghost, .moon, .board .oled, .diagram .flow, .bar i, .blank, .done-btn, .ex-done span { animation: none !important; }
+  .bat { display: none; }
+}
+
 </style>
 
 <div class="wrap">
 
 <header class="hero">
+  <div class="night" aria-hidden="true">
+    <div class="moon"></div>
+    <div class="fog f1"></div><div class="fog f2"></div>
+    <div class="bat b1"><svg viewBox="0 0 64 30"><path fill="currentColor" d="M32 10c2-4 3-6 4-8 1 3 1 5 0 7 6-6 16-9 28-6-6 2-9 6-10 12-3-3-7-3-10 1-2-3-6-4-9-2-1 3-2 6-3 9-1-3-2-6-3-9-3-2-7-1-9 2-3-4-7-4-10-1C9 9 6 5 0 3c12-3 22 0 28 6-1-2-1-4 0-7 1 2 2 4 4 8z"/></svg></div>
+    <div class="bat b2"><svg viewBox="0 0 64 30"><path fill="currentColor" d="M32 10c2-4 3-6 4-8 1 3 1 5 0 7 6-6 16-9 28-6-6 2-9 6-10 12-3-3-7-3-10 1-2-3-6-4-9-2-1 3-2 6-3 9-1-3-2-6-3-9-3-2-7-1-9 2-3-4-7-4-10-1C9 9 6 5 0 3c12-3 22 0 28 6-1-2-1-4 0-7 1 2 2 4 4 8z"/></svg></div>
+    <div class="bat b3"><svg viewBox="0 0 64 30"><path fill="currentColor" d="M32 10c2-4 3-6 4-8 1 3 1 5 0 7 6-6 16-9 28-6-6 2-9 6-10 12-3-3-7-3-10 1-2-3-6-4-9-2-1 3-2 6-3 9-1-3-2-6-3-9-3-2-7-1-9 2-3-4-7-4-10-1C9 9 6 5 0 3c12-3 22 0 28 6-1-2-1-4 0-7 1 2 2 4 4 8z"/></svg></div>
+    <svg class="web-corner" viewBox="0 0 120 120"><g fill="none" stroke="currentColor" stroke-width="1" style="color: var(--web)"><path d="M0 0L120 40M0 0L90 90M0 0L40 120"/><path d="M30 10Q24 22 22 30Q14 32 8 34"/><path d="M60 20Q48 42 45 60Q30 66 16 70"/><path d="M90 30Q72 62 67 90Q46 98 26 104"/></g></svg>
+    <div class="spider"><svg viewBox="0 0 24 24"><g stroke="var(--web)" stroke-width="1.4" fill="none" stroke-linecap="round"><path d="M8 10L2 6M8 12L1 12M8 14L2 18M9 15L5 22M16 10L22 6M16 12L23 12M16 14L22 18M15 15L19 22"/></g><ellipse cx="12" cy="13" rx="5" ry="6" fill="#1a1024" stroke="var(--web)" stroke-width="1"/><circle cx="10.3" cy="11" r="1.1" fill="#ff8a1f"/><circle cx="13.7" cy="11" r="1.1" fill="#ff8a1f"/></svg></div>
+  </div>
+
   <div>
-    <p class="eyebrow">Guía para la IA tutora · ESP32 + OLED en Wokwi</p>
+    <p class="eyebrow">Guía para la IA tutora · ESP32 + OLED en Wokwi · edición Halloween</p>
     <h1>Detener Python <em>remoto</em> y ver la OLED en el mismo instante</h1>
     <p class="lede">Reproduce la demo de diagnóstico de Sergio: pausar MicroPython dentro del ESP32 simulado y observar juntos contador, pila de llamadas y pantalla. Confirmado con capturas el 16 de octubre de 2026: <code>oled_demo.py:29</code>, contador 1 y OLED «vuelta 1».</p>
     <ul class="specs" aria-label="Equipo probado">
@@ -297,9 +398,12 @@ html { scroll-behavior: smooth; }
       <a class="btn-primary" href="https://github.com/Cassers/luka-wokwi-oled-debug">Archivos en GitHub</a>
       <a class="btn-ghost" href="https://github.com/Cassers/luka-wokwi-oled-debug/archive/refs/heads/main.zip">Descargar ZIP</a>
       <a class="btn-ghost" href="#pines">Cómo funcionan los pines</a>
+      <a class="btn-ghost" href="#practica">Ruta de práctica</a>
     </div>
   </div>
   <figure class="board" style="margin:0" aria-label="Pantalla OLED esperada en el breakpoint">
+    <svg class="ghost" viewBox="0 0 60 70" aria-hidden="true"><path d="M30 2C14 2 4 14 4 30v36l8-7 7 7 7-7 4 4 4-4 7 7 7-7 8 7V30C56 14 46 2 30 2z" fill="#f4eefc"/><ellipse cx="22" cy="28" rx="4" ry="6" fill="#170f22"/><ellipse cx="38" cy="28" rx="4" ry="6" fill="#170f22"/><ellipse cx="30" cy="44" rx="5" ry="4" fill="#170f22"/></svg>
+
     <div class="oled">
       <div class="big">Demo OLED</div>
       <div>Sergio: ESP32 OK</div>
@@ -354,18 +458,22 @@ html { scroll-behavior: smooth; }
         <g><circle cx="392" cy="60" r="5" class="pin"/><text x="404" y="64" class="lbl-sm pin-label used">3V3</text><circle cx="392" cy="84" r="5" class="pin"/><text x="404" y="88" class="lbl-sm pin-label">EN</text><circle cx="392" cy="108" r="5" class="pin"/><text x="404" y="112" class="lbl-sm pin-label">VP</text><circle cx="392" cy="132" r="5" class="pin"/><text x="404" y="136" class="lbl-sm pin-label">VN</text><circle cx="392" cy="156" r="5" class="pin"/><text x="404" y="160" class="lbl-sm pin-label">34</text><circle cx="392" cy="180" r="5" class="pin"/><text x="404" y="184" class="lbl-sm pin-label">35</text><circle cx="392" cy="204" r="5" class="pin"/><text x="404" y="208" class="lbl-sm pin-label">32</text><circle cx="392" cy="228" r="5" class="pin"/><text x="404" y="232" class="lbl-sm pin-label">33</text><circle cx="392" cy="252" r="5" class="pin"/><text x="404" y="256" class="lbl-sm pin-label">25</text><circle cx="392" cy="276" r="5" class="pin"/><text x="404" y="280" class="lbl-sm pin-label">26</text><circle cx="392" cy="300" r="5" class="pin"/><text x="404" y="304" class="lbl-sm pin-label">27</text><circle cx="392" cy="324" r="5" class="pin"/><text x="404" y="328" class="lbl-sm pin-label">14</text><circle cx="392" cy="348" r="5" class="pin"/><text x="404" y="352" class="lbl-sm pin-label">12</text><circle cx="392" cy="372" r="5" class="pin"/><text x="404" y="376" class="lbl-sm pin-label used">GND</text><circle cx="588" cy="60" r="5" class="pin"/><text x="576" y="64" text-anchor="end" class="lbl-sm pin-label">GND</text><circle cx="588" cy="84" r="5" class="pin"/><text x="576" y="88" text-anchor="end" class="lbl-sm pin-label">23</text><circle cx="588" cy="108" r="5" class="pin"/><text x="576" y="112" text-anchor="end" class="lbl-sm pin-label used">22</text><circle cx="588" cy="132" r="5" class="pin"/><text x="576" y="136" text-anchor="end" class="lbl-sm pin-label">TX</text><circle cx="588" cy="156" r="5" class="pin"/><text x="576" y="160" text-anchor="end" class="lbl-sm pin-label">RX</text><circle cx="588" cy="180" r="5" class="pin"/><text x="576" y="184" text-anchor="end" class="lbl-sm pin-label used">21</text><circle cx="588" cy="204" r="5" class="pin"/><text x="576" y="208" text-anchor="end" class="lbl-sm pin-label">GND</text><circle cx="588" cy="228" r="5" class="pin"/><text x="576" y="232" text-anchor="end" class="lbl-sm pin-label">19</text><circle cx="588" cy="252" r="5" class="pin"/><text x="576" y="256" text-anchor="end" class="lbl-sm pin-label">18</text><circle cx="588" cy="276" r="5" class="pin"/><text x="576" y="280" text-anchor="end" class="lbl-sm pin-label">5</text><circle cx="588" cy="300" r="5" class="pin"/><text x="576" y="304" text-anchor="end" class="lbl-sm pin-label">17</text><circle cx="588" cy="324" r="5" class="pin"/><text x="576" y="328" text-anchor="end" class="lbl-sm pin-label">16</text><circle cx="588" cy="348" r="5" class="pin"/><text x="576" y="352" text-anchor="end" class="lbl-sm pin-label">4</text><circle cx="588" cy="372" r="5" class="pin"/><text x="576" y="376" text-anchor="end" class="lbl-sm pin-label">0</text></g>
         <g fill="none" stroke-linejoin="round" stroke-linecap="round">
           <path d="M120 60 V44 H340 V60 H392" class="w w-vcc"/>
+          <path d="M120 60 V44 H340 V60 H392" class="flow toward"/>
           <path d="M80 60 V50 H14 V372 H392" class="w w-gnd"/>
+          <path d="M80 60 V50 H14 V372 H392" class="flow away"/>
           <path d="M200 60 V34 H620 V180 H588" class="gap"/>
           <path d="M200 60 V34 H620 V180 H588" class="w w-sda"/>
+          <path d="M200 60 V34 H620 V180 H588" class="flow toward"/>
           <path d="M160 60 V24 H640 V108 H588" class="gap"/>
           <path d="M160 60 V24 H640 V108 H588" class="w w-scl"/>
+          <path d="M160 60 V24 H640 V108 H588" class="flow toward"/>
         </g>
         <circle cx="80" cy="60" r="5" class="d-gnd"/><circle cx="120" cy="60" r="5" class="d-vcc"/>
         <circle cx="160" cy="60" r="5" class="d-scl"/><circle cx="200" cy="60" r="5" class="d-sda"/>
         <circle cx="392" cy="60" r="5.5" class="d-vcc"/><circle cx="392" cy="372" r="5.5" class="d-gnd"/><circle cx="588" cy="108" r="5.5" class="d-scl"/><circle cx="588" cy="180" r="5.5" class="d-sda"/>
       </svg>
       </div>
-      <figcaption>El mismo montaje de <code>diagram.json</code>. Los colores de los cables son los que usa Wokwi.</figcaption>
+      <figcaption>El mismo montaje de <code>diagram.json</code>. Los colores de los cables son los que usa Wokwi. Los puntitos que se mueven muestran hacia dónde viajan la energía y los datos.</figcaption>
     </figure>
 
     <div class="wire-cards">
@@ -458,6 +566,7 @@ code .</pre></div>
 └── MicroPython-debug/
     ├── main.py
     ├── oled_demo.py
+    ├── practica.py
     ├── ssd1306.py
     ├── diagram.json
     ├── wokwi.toml
@@ -659,6 +768,292 @@ code .</pre></div>
   <li><label><input type="checkbox" id="acc-5"><span>Luka explica por qué <code>show()</code> precede al breakpoint y por qué Python del PC no maneja esta OLED.</span></label></li>
 </ul>
 
+<section class="ruta-sec" id="practica" aria-labelledby="practica-t">
+  <p class="eyebrow">Después de la demo</p>
+  <h2 class="section-title" id="practica-t">Ruta de práctica embrujada</h2>
+  <p class="section-sub">Un poco de teoría, practicar, una idea nueva, practicar otra vez. Cada práctica usa lo de antes y le suma algo. Se trabaja en <code>MicroPython-debug/practica.py</code>.</p>
+
+  <div class="how">
+    <div class="rule">
+      <h3>Cómo se practica</h3>
+      <ol class="inner">
+        <li>Abre <code>MicroPython-debug/practica.py</code>.</li>
+        <li>Reemplaza lo que está dentro de <code>def practica(display):</code> por el código de la práctica.</li>
+        <li>Completa los huecos <span class="blank">___</span>.</li>
+        <li>En Ejecutar y depurar elige <strong>Práctica OLED — REMOTA GHI</strong> y pulsa el triángulo. Wokwi debe estar en marcha con <code>MicroPython-debug/wokwi.toml</code>.</li>
+        <li>Si aparece <strong>Paused on entry</strong>, pulsa <kbd>F5</kbd>. Al terminar, detén la depuración antes de cambiar de práctica.</li>
+      </ol>
+    </div>
+    <div class="rule tutor">
+      <h3>Para la IA tutora</h3>
+      <p>Antes de ejecutar, pide a Luka que prediga qué verá. Da las pistas de una en una y solo cuando las pida o se atasque. No completes los huecos por Luka: si se equivoca, pregúntale qué esperaba ver y qué vio.</p>
+    </div>
+  </div>
+
+  <ul class="legend" aria-label="Tipos de bloque">
+    <li><span class="kchip k-teo">Teoría</span>idea base</li>
+    <li><span class="kchip k-con">Concepto nuevo</span>algo que aún no usaste</li>
+    <li><span class="kchip k-pro">Profundización</span>lo mismo, más a fondo</li>
+    <li><span class="kchip k-pra">Práctica</span>manos al código</li>
+  </ul>
+
+  <ol class="ruta">
+
+    <!-- T1 -->
+    <li class="blk teo">
+      <span class="kchip k-teo">Teoría</span>
+      <h3>La pantalla es una cuadrícula de puntitos</h3>
+      <div class="split">
+        <div>
+          <p>La OLED tiene <strong>128 puntitos de ancho y 64 de alto</strong>. Cada puntito (píxel) tiene una dirección: <strong>x</strong> cuenta de izquierda a derecha y <strong>y</strong> de arriba hacia abajo. El (0, 0) es la esquina de arriba a la izquierda.</p>
+          <p>Tres órdenes bastan para empezar:</p>
+          <dl class="facts">
+            <dt>fill(0)</dt><dd>Borra todo: pinta la hoja de negro.</dd>
+            <dt>text("Hola", x, y, 1)</dt><dd>Escribe empezando en el punto (x, y). El <code>1</code> es «encendido».</dd>
+            <dt>show()</dt><dd>Envía el dibujo a la pantalla. Antes de esto no se ve nada.</dd>
+          </dl>
+          <p class="note">Piensa en una hoja: <code>fill</code> y <code>text</code> dibujan en la hoja; <code>show()</code> la pega en la ventana.</p>
+        </div>
+        <svg class="grid-svg" viewBox="0 0 300 180" role="img" aria-label="Cuadrícula de 128 por 64 con el origen arriba a la izquierda">
+          <rect x="20" y="20" width="256" height="128" class="g-screen"/>
+          <g class="g-lines">
+            <path d="M52 20V148M84 20V148M116 20V148M148 20V148M180 20V148M212 20V148M244 20V148M20 52H276M20 84H276M20 116H276"/>
+          </g>
+          <circle cx="20" cy="20" r="5" class="g-dot"/>
+          <circle cx="276" cy="148" r="5" class="g-dot"/>
+          <text x="26" y="14" class="g-lbl">(0, 0)</text>
+          <text x="276" y="168" class="g-lbl" text-anchor="end">(127, 63)</text>
+          <path d="M40 34 H110" class="g-arrow"/><text x="114" y="38" class="g-lbl">x →</text>
+          <path d="M34 40 V100" class="g-arrow"/><text x="40" y="112" class="g-lbl">y ↓</text>
+          <text x="148" y="90" class="g-px" text-anchor="middle">128 × 64</text>
+        </svg>
+      </div>
+    </li>
+
+    <!-- P1 -->
+    <li class="blk pra">
+      <span class="kchip k-pra">Práctica 1</span>
+      <h3>Tu nombre en la cripta</h3>
+      <p class="meta">Usa: <code>fill</code> · <code>text</code> · <code>show</code></p>
+      <div class="code"><span class="lang">python · practica.py</span><button class="copy" type="button">Copiar</button><pre><span class="c-kw">def</span> practica(display):
+    display.fill(0)
+    display.text(<span class="c-str">"Feliz Halloween"</span>, 0, 0, 1)
+    display.text(<span class="blank">___</span>, 0, 20, 1)   <span class="c-com"># escribe tu nombre</span>
+    display.show()</pre></div>
+      <div class="hints">
+        <details><summary>Pista 1</summary><p>El texto va entre comillas, igual que <code>"Feliz Halloween"</code>.</p></details>
+        <details><summary>Pista 2</summary><p>Si no aparece nada, revisa que <code>show()</code> siga al final.</p></details>
+      </div>
+      <p class="check"><strong>Comprueba:</strong> arriba «Feliz Halloween» y debajo tu nombre. ¿Qué número cambiarías para bajar tu nombre hasta la última línea?</p>
+      <label class="ex-done"><input type="checkbox" id="ej-1"><span>¡Lo logré!</span></label>
+    </li>
+
+    <!-- C2 -->
+    <li class="blk con">
+      <span class="kchip k-con">Concepto nuevo</span>
+      <h3>Dibujar formas</h3>
+      <p>Además de letras, la pantalla puede dibujar puntos, líneas y rectángulos. Todos empiezan por la esquina de arriba a la izquierda (x, y).</p>
+      <dl class="facts">
+        <dt>pixel(x, y, 1)</dt><dd>Enciende un solo puntito.</dd>
+        <dt>hline(x, y, largo, 1)</dt><dd>Línea horizontal de <em>largo</em> puntitos.</dd>
+        <dt>rect(x, y, ancho, alto, 1)</dt><dd>Rectángulo hueco, solo el borde.</dd>
+        <dt>fill_rect(x, y, ancho, alto, 1)</dt><dd>Rectángulo relleno.</dd>
+      </dl>
+      <p class="note">Igual que con el texto: se dibuja en la hoja y se ve al llamar a <code>show()</code>.</p>
+    </li>
+
+    <!-- P3 -->
+    <li class="blk pra">
+      <span class="kchip k-pra">Práctica 2</span>
+      <h3>Calabaza de cuadrados</h3>
+      <p class="meta">Usa: <code>rect</code> · <code>fill_rect</code></p>
+      <div class="code"><span class="lang">python · practica.py</span><button class="copy" type="button">Copiar</button><pre><span class="c-kw">def</span> practica(display):
+    display.fill(0)
+    display.rect(44, 20, 40, 36, 1)          <span class="c-com"># cuerpo: empieza en y = 20</span>
+    display.fill_rect(60, 12, 8, <span class="blank">___</span>, 1)   <span class="c-com"># tallo: empieza en y = 12</span>
+    display.show()</pre></div>
+      <div class="hints">
+        <details><summary>Pista 1</summary><p>El hueco es el <em>alto</em> del tallo.</p></details>
+        <details><summary>Pista 2</summary><p>El tallo empieza en y = 12 y debe tocar el cuerpo, que empieza en y = 20. ¿Cuántos puntitos hay entre los dos?</p></details>
+      </div>
+      <p class="check"><strong>Comprueba:</strong> un cuadrado hueco con un tallo encima, sin espacio entre los dos. ¿Qué pasa si el alto es muy grande?</p>
+      <label class="ex-done"><input type="checkbox" id="ej-2"><span>¡Lo logré!</span></label>
+    </li>
+
+    <!-- D2 -->
+    <li class="blk pro">
+      <span class="kchip k-pro">Profundización</span>
+      <h3>Calcular posiciones: centrar y simetría</h3>
+      <p>Cada letra mide <strong>8 × 8 puntitos</strong>: caben 16 letras por línea (128 ÷ 8) y 8 líneas (64 ÷ 8). Para centrar un texto se resta lo que ocupa del ancho total y se reparte a los dos lados:</p>
+      <div class="formula">x = (128 − letras × 8) ÷ 2</div>
+      <p>Ejemplo: «Hola» tiene 4 letras → (128 − 32) ÷ 2 = <strong>48</strong>. Los espacios y signos también cuentan.</p>
+      <p>Con las formas pasa igual. El cuerpo de la calabaza empieza en x = 44 y mide 40: ocupa de <strong>44 a 83</strong>. El ojo izquierdo empieza en x = 52, o sea <strong>8 puntitos</strong> dentro del borde. El derecho debe <em>terminar</em> 8 antes del borde derecho; como mide 6 de ancho, también hay que restar esos 6:</p>
+      <div class="formula">inicio del ojo derecho = 84 − 8 − 6</div>
+    </li>
+
+    <!-- P4 -->
+    <li class="blk pra">
+      <span class="kchip k-pra">Práctica 3</span>
+      <h3>Dale cara a la calabaza</h3>
+      <p class="meta">Usa: lo de la práctica 2 + centrar + simetría + <code>hline</code></p>
+      <div class="code"><span class="lang">python · practica.py</span><button class="copy" type="button">Copiar</button><pre><span class="c-kw">def</span> practica(display):
+    display.fill(0)
+    display.rect(44, 20, 40, 36, 1)        <span class="c-com"># cuerpo</span>
+    display.fill_rect(60, 12, 8, 8, 1)     <span class="c-com"># tallo</span>
+    display.fill_rect(52, 28, 6, 6, 1)     <span class="c-com"># ojo izquierdo</span>
+    display.fill_rect(<span class="blank">___</span>, 28, 6, 6, 1)    <span class="c-com"># ojo derecho</span>
+    display.hline(52, 46, <span class="blank">___</span>, 1)       <span class="c-com"># boca centrada</span>
+    display.text(<span class="c-str">"BOO!"</span>, <span class="blank">___</span>, 0, 1)      <span class="c-com"># texto centrado arriba</span>
+    display.show()</pre></div>
+      <div class="hints">
+        <details><summary>Pista 1</summary><p>Para el ojo derecho, usa la cuenta de la profundización.</p></details>
+        <details><summary>Pista 2</summary><p>La boca empieza 8 puntitos dentro del borde izquierdo (x = 52). Debe terminar 8 antes del borde derecho, en x = 75. ¿Cuántos puntitos hay de 52 a 75, contando los dos?</p></details>
+        <details><summary>Pista 3</summary><p>Para «BOO!», cuenta sus letras (el signo también) y usa la fórmula de centrar.</p></details>
+      </div>
+      <p class="check"><strong>Comprueba:</strong> los dos ojos a la misma distancia de los lados, la boca centrada y «BOO!» centrado arriba. Reto: hazle dientes con <code>pixel</code>.</p>
+      <label class="ex-done"><input type="checkbox" id="ej-3"><span>¡Lo logré!</span></label>
+    </li>
+
+    <!-- C3 -->
+    <li class="blk con">
+      <span class="kchip k-con">Concepto nuevo</span>
+      <h3>Repetir sin copiar: <code>for</code></h3>
+      <p>Cuando algo se repite, no hace falta escribirlo muchas veces. <code>for</code> repite las líneas que tiene debajo <strong>con sangría</strong> (4 espacios a la derecha).</p>
+      <div class="code"><span class="lang">python · ejemplo</span><pre><span class="c-kw">for</span> i <span class="c-kw">in</span> range(3):
+    display.pixel(i * 10, 0, 1)   <span class="c-com"># se repite 3 veces</span></pre></div>
+      <p><code>range(3)</code> le da a <code>i</code> los valores <strong>0, 1 y 2</strong>: empieza en 0 y no llega al 3. En cada vuelta <code>i</code> vale distinto, así que <code>i * 10</code> pone cada punto en otro sitio: x = 0, 10, 20.</p>
+    </li>
+
+    <!-- P5 -->
+    <li class="blk pra">
+      <span class="kchip k-pra">Práctica 4</span>
+      <h3>Murciélagos en fila</h3>
+      <p class="meta">Usa: <code>for</code> · <code>range</code> · <code>fill_rect</code></p>
+      <div class="code"><span class="lang">python · practica.py</span><button class="copy" type="button">Copiar</button><pre><span class="c-kw">def</span> practica(display):
+    display.fill(0)
+    <span class="c-kw">for</span> i <span class="c-kw">in</span> range(<span class="blank">___</span>):           <span class="c-com"># queremos 4 murciélagos</span>
+        display.fill_rect(i * 30 + 4, 20, 20, 10, 1)
+    display.show()</pre></div>
+      <div class="hints">
+        <details><summary>Pista 1</summary><p><code>range(n)</code> repite n veces.</p></details>
+        <details><summary>Pista 2</summary><p>Pon un breakpoint en la línea de <code>fill_rect</code> y mira cuánto vale <code>i</code> en cada parada con <kbd>F5</kbd>.</p></details>
+      </div>
+      <p class="check"><strong>Comprueba:</strong> 4 rectángulos en fila. Antes de ejecutar, predice: ¿en qué x empieza el tercero? ¿Por qué <code>show()</code> está fuera del <code>for</code>?</p>
+      <label class="ex-done"><input type="checkbox" id="ej-4"><span>¡Lo logré!</span></label>
+    </li>
+
+    <!-- D3 -->
+    <li class="blk pro">
+      <span class="kchip k-pro">Profundización</span>
+      <h3><code>range</code> con inicio, fin y paso, y esperar</h3>
+      <dl class="facts">
+        <dt>range(1, 4)</dt><dd>1, 2, 3. Empieza en 1, no llega al 4.</dd>
+        <dt>range(0, 10, 2)</dt><dd>0, 2, 4, 6, 8. Va de 2 en 2.</dd>
+        <dt>range(3, 0, -1)</dt><dd>3, 2, 1. Paso negativo: cuenta hacia atrás.</dd>
+        <dt>time.sleep(1)</dt><dd>Espera 1 segundo antes de seguir.</dd>
+        <dt>str(5)</dt><dd>Convierte el número 5 en el texto «5». <code>text()</code> solo acepta texto.</dd>
+      </dl>
+    </li>
+
+    <!-- P6 -->
+    <li class="blk pra">
+      <span class="kchip k-pra">Práctica 5</span>
+      <h3>Cuenta regresiva para Halloween</h3>
+      <p class="meta">Usa: <code>range</code> hacia atrás · <code>str</code> · <code>time.sleep</code></p>
+      <div class="code"><span class="lang">python · practica.py</span><button class="copy" type="button">Copiar</button><pre><span class="c-kw">def</span> practica(display):
+    <span class="c-kw">for</span> numero <span class="c-kw">in</span> range(<span class="blank">___</span>, <span class="blank">___</span>, -1):   <span class="c-com"># 5, 4, 3, 2, 1</span>
+        display.fill(0)
+        display.text(<span class="c-str">"Halloween en"</span>, 16, 10, 1)
+        display.text(str(numero), 60, 30, 1)
+        display.show()
+        time.sleep(1)
+    display.fill(0)
+    display.text(<span class="c-str">"BOO!"</span>, 48, 28, 1)
+    display.show()</pre></div>
+      <div class="hints">
+        <details><summary>Pista 1</summary><p>El primer hueco es donde empieza la cuenta.</p></details>
+        <details><summary>Pista 2</summary><p>El fin <em>no se incluye</em>. Si quieres que el último sea 1, ¿dónde tienes que parar?</p></details>
+      </div>
+      <p class="check"><strong>Comprueba:</strong> 5, 4, 3, 2, 1 y luego «BOO!». ¿Por qué el «BOO!» está fuera del <code>for</code>?</p>
+      <label class="ex-done"><input type="checkbox" id="ej-5"><span>¡Lo logré!</span></label>
+    </li>
+
+    <!-- C4 -->
+    <li class="blk con">
+      <span class="kchip k-con">Concepto nuevo</span>
+      <h3>Variables que van sumando</h3>
+      <p>Una variable es una caja con nombre que guarda un valor. Puede cambiar: <code>dulces = dulces + 2</code> significa «lo que había en la caja, más 2, y lo guardo otra vez en la caja».</p>
+      <p>El depurador te deja <strong>ver la caja por dentro</strong>: en cada pausa, el panel Variables muestra cuánto vale ahora. Así compruebas si lo que pensabas es lo que pasa de verdad.</p>
+    </li>
+
+    <!-- P7 -->
+    <li class="blk pra">
+      <span class="kchip k-pra">Práctica 6</span>
+      <h3>La bolsa de dulces</h3>
+      <p class="meta">Usa: variables · <code>for</code> · el depurador</p>
+      <div class="code"><span class="lang">python · practica.py</span><button class="copy" type="button">Copiar</button><pre><span class="c-kw">def</span> practica(display):
+    dulces = 0
+    <span class="c-kw">for</span> casa <span class="c-kw">in</span> range(1, 5):
+        dulces = dulces + casa     <span class="c-com"># cada casa da tantos dulces como su número</span>
+        display.fill(0)
+        display.text(<span class="c-str">"Casa "</span> + str(casa), 0, 0, 1)
+        display.text(<span class="c-str">"Dulces: "</span> + str(dulces), 0, 20, 1)
+        display.show()
+        time.sleep(1)</pre></div>
+      <p>Esta vez no hay huecos: el reto es <strong>predecir</strong>. Antes de ejecutar, haz en papel una tabla con dos columnas, <em>casa</em> y <em>dulces</em>, y llénala vuelta por vuelta.</p>
+      <div class="hints">
+        <details><summary>Pista 1</summary><p>Primera vuelta: <code>casa</code> vale 1 y <code>dulces</code> valía 0. ¿Cuánto queda?</p></details>
+        <details><summary>Pista 2</summary><p>Pon un breakpoint en la línea de <code>display.show()</code> y compara tu tabla con el panel Variables en cada <kbd>F5</kbd>.</p></details>
+      </div>
+      <p class="check"><strong>Comprueba:</strong> tu tabla coincide con Variables y con la pantalla en las 4 casas. Reto: ¿qué cambiarías para que cada casa dé siempre 2 dulces?</p>
+      <label class="ex-done"><input type="checkbox" id="ej-6"><span>¡Lo logré!</span></label>
+    </li>
+
+    <!-- D4 -->
+    <li class="blk pro">
+      <span class="kchip k-pro">Profundización</span>
+      <h3>Dibujar en la hoja o mandar una orden</h3>
+      <p>Hasta ahora todo se dibujaba en la hoja y se veía con <code>show()</code>. Algunas funciones son distintas: son <strong>órdenes directas a la pantalla</strong> y actúan al instante, sin <code>show()</code>.</p>
+      <dl class="facts">
+        <dt>invert(1)</dt><dd>Cambia negro por blanco en toda la pantalla.</dd>
+        <dt>invert(0)</dt><dd>La deja como estaba.</dd>
+      </dl>
+      <p class="note">Por eso invertir es instantáneo: no cambia el dibujo de la hoja, cambia cómo la pantalla lo muestra.</p>
+    </li>
+
+    <!-- P8 -->
+    <li class="blk pra">
+      <span class="kchip k-pra">Práctica 7</span>
+      <h3>El fantasma que parpadea</h3>
+      <p class="meta">Usa: <code>invert</code> · <code>for</code> · <code>time.sleep</code></p>
+      <div class="code"><span class="lang">python · practica.py</span><button class="copy" type="button">Copiar</button><pre><span class="c-kw">def</span> practica(display):
+    display.fill(0)
+    display.text(<span class="c-str">"BOO!"</span>, 48, 28, 1)
+    display.show()
+    <span class="c-kw">for</span> vez <span class="c-kw">in</span> range(<span class="blank">___</span>):        <span class="c-com"># parpadea 3 veces</span>
+        display.invert(1)
+        time.sleep(0.5)
+        display.invert(<span class="blank">___</span>)
+        time.sleep(0.5)</pre></div>
+      <div class="hints">
+        <details><summary>Pista 1</summary><p>Mira la profundización: un valor invierte, el otro devuelve la pantalla a la normalidad.</p></details>
+        <details><summary>Pista 2</summary><p>Pon un breakpoint en <code>time.sleep(0.5)</code> y avanza con <kbd>F5</kbd>: ¿cambia la pantalla aunque no haya <code>show()</code>?</p></details>
+      </div>
+      <p class="check"><strong>Comprueba:</strong> «BOO!» parpadea 3 veces y termina con fondo negro. ¿Qué pasa si quitas el segundo <code>time.sleep</code>?</p>
+      <label class="ex-done"><input type="checkbox" id="ej-7"><span>¡Lo logré!</span></label>
+    </li>
+
+    <!-- Final -->
+    <li class="blk pra final">
+      <span class="kchip k-pra">Reto final</span>
+      <h3>Tu escena de Halloween</h3>
+      <p>Junta lo aprendido en una sola escena: una cuenta regresiva, después aparece la calabaza con cara y, al final, la pantalla parpadea. Antes de escribir código, dibuja en papel la cuadrícula y apunta las coordenadas.</p>
+      <p class="check"><strong>Comprueba:</strong> explica a tu tutor en qué orden pasan las cosas y por qué, usando un breakpoint para enseñarlo.</p>
+      <label class="ex-done"><input type="checkbox" id="ej-8"><span>¡Lo logré!</span></label>
+    </li>
+  </ol>
+</section>
+
 <div class="closing">
   <div class="rule"><h3>Al terminar</h3><p>Detén la depuración y la tarea del puente antes de detener Wokwi. El almacenamiento simulado es volátil; GHI resincroniza al lanzar.</p></div>
   <div class="rule"><h3>Fallback opcional</h3><p>Seleccionar <code>MicroPython/wokwi.toml</code> y seguir la guía normal (<code>MicroPython/GUIA-AGENTE-LUKA.md</code>, no incluida en el repositorio; pedirla al profesor) con su firmware y carga <code>mpremote</code>, después de liberar el puente.</p></div>
@@ -702,7 +1097,7 @@ code .</pre></div>
   });
   renderProgress();
 
-  document.querySelectorAll(".accept input").forEach(function (cb) {
+  document.querySelectorAll(".accept input, .ex-done input").forEach(function (cb) {
     cb.checked = !!state.acc[cb.id];
     cb.addEventListener("change", function () { state.acc[cb.id] = cb.checked; save(); });
   });

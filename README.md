@@ -21,9 +21,13 @@ Sin git: botón **Code → Download ZIP** y abrir en VS Code la carpeta descompr
 .vscode/launch.json   perfiles de depuración remota GHI
 .vscode/tasks.json    tareas que arrancan y comprueban el puente
 tools/wokwi_debug_bridge.py   puente RFC2217 → PTY (Linux)
-MicroPython-debug/    demo OLED, controlador ssd1306, circuito Wokwi y guía
+MicroPython-debug/    demo OLED, practica.py (ejercicios), controlador ssd1306, circuito Wokwi y guía
 index.html            la guía web (GitHub Pages)
 ```
+
+## Practicar
+
+Después de la demo, la guía web tiene una **ruta de práctica** (teoría → práctica → concepto nuevo → práctica…). Se trabaja en `MicroPython-debug/practica.py` con el perfil **Práctica OLED — REMOTA GHI**.
 
 ## Qué NO contiene (lo preparas tú siguiendo la guía)
 

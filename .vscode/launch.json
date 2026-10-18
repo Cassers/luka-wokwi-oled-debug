@@ -15,6 +15,19 @@
             "checkFirmwareUpdate": false
         },
         {
+            "name": "Práctica OLED — REMOTA GHI",
+            "preLaunchTask": "Wokwi GHI: comprobar puente activo",
+            "type": "micropython",
+            "request": "launch",
+            "program": "${workspaceFolder}/MicroPython-debug/practica.py",
+            "sync": true,
+            "stopOnEntry": true,
+            "debugInterface": "uart",
+            "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "debugBaud": 115200,
+            "checkFirmwareUpdate": false
+        },
+        {
             "name": "MicroPython GHI — prueba Python en Wokwi (experimental)",
             "preLaunchTask": "Wokwi GHI: comprobar puente activo",
             "type": "micropython",
