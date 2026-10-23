@@ -408,6 +408,17 @@ html { scroll-behavior: smooth; }
 .ex-done { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 700; }
 .ex-done input { width: 20px; height: 20px; accent-color: var(--accent); }
 .ex-done input:checked + span { color: var(--k-pra); animation: pop .45s ease; display: inline-block; }
+.retos-sec { padding-top: 8px; }
+.bug-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 14px; margin: 10px 0 28px; }
+.bug-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px 18px; min-width: 0; display: flex; flex-direction: column; gap: 6px; transition: transform .25s ease, border-color .25s ease; }
+.bug-card:hover { border-color: color-mix(in srgb, var(--k-pra) 55%, var(--line)); }
+.bug-card h4 { margin: 4px 0 0; font-size: 1.1rem; }
+.bug-card p { margin: 0; }
+.bug-run { color: var(--muted); font-size: .88rem; overflow-wrap: anywhere; }
+.bug-card .hints { margin: 4px 0 6px; }
+.bug-card .ex-done { margin-top: auto; }
+.bug-card .kchip { align-self: flex-start; }
+.checklist { margin: 0 0 12px; padding-left: 20px; display: grid; gap: 6px; max-width: 70ch; }
 .blk.final { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 0 40px -18px var(--accent); }
 
 @keyframes fly { 0% { transform: translate(0, 0); } 25% { transform: translate(30vw, -18px); } 50% { transform: translate(60vw, 14px); } 75% { transform: translate(90vw, -10px); } 100% { transform: translate(125vw, 6px); } }
@@ -457,6 +468,7 @@ html { scroll-behavior: smooth; }
       <a class="btn-ghost" href="#practica">Ruta de práctica</a>
       <a class="btn-ghost" href="#chips">Otros chips</a>
       <a class="btn-ghost" href="#sensores">Sensores</a>
+      <a class="btn-ghost" href="#retos">Retos</a>
       <a class="btn-ghost" href="https://github.com/Cassers/luka-wokwi-oled-debug">Archivos en GitHub</a>
     </div>
   </div>
@@ -1860,10 +1872,203 @@ time.sleep_ms(750)</pre></div></div></li><li><div class="cstep-n">4</div><div cl
   <p class="note">Estos circuitos y programas se probaron en el PC con sensores simulados, pero aún no en tu Wokwi. Si algo no responde, revisa primero los cables y avisa a tu tutor con el mensaje completo.</p>
 </section>
 
+<section class="retos-sec" id="retos" aria-labelledby="retos-t">
+  <p class="eyebrow">Retos</p>
+  <h2 class="section-title" id="retos-t">Caza el bicho y arma la cripta</h2>
+  <p class="section-sub">Primero diez programas que <em>casi</em> funcionan: cada uno tiene un error escondido y tu herramienta es el depurador. Después, un circuito que armas tú, pieza por pieza, con varios chips a la vez. Haz <code>git pull</code> para traer los archivos <code>*_bicho.py</code> y la carpeta <code>retos/</code>.</p>
+
+  <div class="warn"><b>Regla de oro del circuito.</b> El <code>wokwi.toml</code> que eliges en <strong>Select Config File</strong> y el perfil que lanzas con F5 tienen que ser <strong>de la misma carpeta</strong>. Si lanzas el termómetro con el circuito del botón, el programa busca un sensor que no existe y verás errores raros como <code>OSError(116)</code>.</div>
+
+  <ol class="ruta">
+    <li class="blk teo">
+      <span class="kchip k-teo">Teoría</span>
+      <h3>Cómo se caza un bicho</h3>
+      <ol class="csteps"><li><div class="cstep-n">1</div><div class="cstep-b"><h4>Lee el síntoma</h4><p>Arriba de cada archivo <code>*_bicho.py</code> dice qué sale mal. Primero míralo pasar en Wokwi.</p></div></li><li><div class="cstep-n">2</div><div class="cstep-b"><h4>Piensa dónde nace el valor equivocado</h4><p>Si la pantalla muestra un número raro, el bicho está donde se <em>calcula</em> ese número, no donde se dibuja.</p></div></li><li><div class="cstep-n">3</div><div class="cstep-b"><h4>Pon un breakpoint y mira</h4><p>Haz clic a la izquierda del número de línea. Al parar, revisa <strong>Variables</strong> o agrega una expresión en <strong>Watch</strong>.</p></div></li><li><div class="cstep-n">4</div><div class="cstep-b"><h4>Avanza línea a línea</h4><p><strong>F10</strong> ejecuta una línea; <strong>F11</strong> entra en una función. Compara lo que esperabas con lo que ves.</p></div></li><li><div class="cstep-n">5</div><div class="cstep-b"><h4>Arregla y vuelve a probar</h4><p>Cambia <strong>una sola cosa</strong> y vuelve a lanzar. Si se arregló, explica con tus palabras por qué fallaba.</p></div></li></ol>
+    </li>
+  </ol>
+
+  <h3 class="sub-h">Diez bichos</h3>
+  <div class="bug-grid">
+    <article class="bug-card">
+      <span class="kchip k-pra">Bicho 1</span>
+      <h4>Botón</h4>
+      <p class="bug-sym"><b>Síntoma:</b> Un solo clic suma varios ingredientes.</p>
+      <p class="bug-run">Circuito <code>sensores/1-boton/wokwi.toml</code> · archivo <code>caldero_bicho.py</code> · perfil <strong>🐞 Sensor 1 · Botón bicho — REMOTA GHI</strong></p>
+      <div class="hints"><details><summary>Pista 1</summary><p>Pon un breakpoint en <code>ingredientes += 1</code> y haz <em>un</em> clic. ¿Cuántas veces se detiene?</p></details><details><summary>Pista 2</summary><p>Mira <code>antes</code> y <code>ahora</code> cada vez que se detiene. ¿Qué quieres contar: que está pulsado, o el momento en que se pulsa?</p></details></div>
+      <label class="ex-done"><input type="checkbox" id="bicho-1"><span>¡Cazado!</span></label>
+    </article>
+    <article class="bug-card">
+      <span class="kchip k-pra">Bicho 2</span>
+      <h4>PIR</h4>
+      <p class="bug-sym"><b>Síntoma:</b> Un solo movimiento suma muchísimos sustos.</p>
+      <p class="bug-run">Circuito <code>sensores/2-pir/wokwi.toml</code> · archivo <code>detector_bicho.py</code> · perfil <strong>🐞 Sensor 2 · PIR bicho — REMOTA GHI</strong></p>
+      <div class="hints"><details><summary>Pista 1</summary><p>Haz <em>Simulate Motion</em> una vez y mira cuántas vueltas seguidas <code>ahora</code> vale 1.</p></details><details><summary>Pista 2</summary><p>Un susto empieza cuando el valor <em>cambia</em> de 0 a 1. ¿La condición mira el valor de antes?</p></details></div>
+      <label class="ex-done"><input type="checkbox" id="bicho-2"><span>¡Cazado!</span></label>
+    </article>
+    <article class="bug-card">
+      <span class="kchip k-pra">Bicho 3</span>
+      <h4>Luz de luna</h4>
+      <p class="bug-sym"><b>Síntoma:</b> Con mucha luz dice «Noche» y de noche dice «Dia».</p>
+      <p class="bug-run">Circuito <code>sensores/4-luz/wokwi.toml</code> · archivo <code>luz_de_luna_bicho.py</code> · perfil <strong>🐞 Sensor 4 · Luz de luna bicho — REMOTA GHI</strong></p>
+      <div class="hints"><details><summary>Pista 1</summary><p>Con <code>lux</code> en 500 (de día), ¿cuánto vale <code>do.value()</code>? Agrégalo en Watch.</p></details><details><summary>Pista 2</summary><p>Vuelve a leer en el Laboratorio qué significa DO = 1.</p></details></div>
+      <label class="ex-done"><input type="checkbox" id="bicho-3"><span>¡Cazado!</span></label>
+    </article>
+    <article class="bug-card">
+      <span class="kchip k-pra">Bicho 4</span>
+      <h4>Potenciómetro</h4>
+      <p class="bug-sym"><b>Síntoma:</b> El número cambia, pero la barra se queda vacía (solo se llena al 100 %).</p>
+      <p class="bug-run">Circuito <code>sensores/3-potenciometro/wokwi.toml</code> · archivo <code>perilla_bicho.py</code> · perfil <strong>🐞 Sensor 3 · Potenciómetro bicho — REMOTA GHI</strong></p>
+      <div class="hints"><details><summary>Pista 1</summary><p>Breakpoint dentro de <code>mostrar</code> con la perilla a la mitad. Calcula a mano la cuenta del ancho de la barra.</p></details><details><summary>Pista 2</summary><p><code>//</code> redondea hacia abajo en cada paso: ¿cuánto da <code>50 // 100</code>? El orden de las operaciones importa.</p></details></div>
+      <label class="ex-done"><input type="checkbox" id="bicho-4"><span>¡Cazado!</span></label>
+    </article>
+    <article class="bug-card">
+      <span class="kchip k-pra">Bicho 5</span>
+      <h4>Radar</h4>
+      <p class="bug-sym"><b>Síntoma:</b> El radar marca el doble de la distancia real.</p>
+      <p class="bug-run">Circuito <code>sensores/5-ultrasonido/wokwi.toml</code> · archivo <code>radar_bicho.py</code> · perfil <strong>🐞 Sensor 5 · Radar bicho — REMOTA GHI</strong></p>
+      <div class="hints"><details><summary>Pista 1</summary><p>Pon la barra del sensor en 100 cm y mira <code>duracion</code> en Variables.</p></details><details><summary>Pista 2</summary><p>El sonido recorre la distancia <em>dos veces</em>: ida y vuelta. ¿La fórmula lo tiene en cuenta?</p></details></div>
+      <label class="ex-done"><input type="checkbox" id="bicho-5"><span>¡Cazado!</span></label>
+    </article>
+    <article class="bug-card">
+      <span class="kchip k-pra">Bicho 6</span>
+      <h4>DHT22</h4>
+      <p class="bug-sym"><b>Síntoma:</b> <code>OSError(116)</code>: el sensor «no contesta».</p>
+      <p class="bug-run">Circuito <code>chips/1-dht22/wokwi.toml</code> · archivo <code>termometro_bicho.py</code> · perfil <strong>🐞 Chip 1 · DHT22 bicho — REMOTA GHI</strong></p>
+      <div class="hints"><details><summary>Pista 1</summary><p>116 significa que nadie respondió a tiempo. ¿En qué pin está esperando el ESP32 la respuesta?</p></details><details><summary>Pista 2</summary><p>Abre <code>diagram.json</code> y busca a qué pin va el cable <code>dht1:SDA</code>.</p></details></div>
+      <label class="ex-done"><input type="checkbox" id="bicho-6"><span>¡Cazado!</span></label>
+    </article>
+    <article class="bug-card">
+      <span class="kchip k-pra">Bicho 7</span>
+      <h4>DS18B20</h4>
+      <p class="bug-sym"><b>Síntoma:</b> El programa se cae con <code>IndexError</code> justo después de buscar sensores.</p>
+      <p class="bug-run">Circuito <code>sensores/6-ds18b20/wokwi.toml</code> · archivo <code>caldero_termico_bicho.py</code> · perfil <strong>🐞 Sensor 6 · DS18B20 bicho — REMOTA GHI</strong></p>
+      <div class="hints"><details><summary>Pista 1</summary><p>Breakpoint después de <code>scan()</code>: ¿cuántos elementos tiene <code>roms</code>?</p></details><details><summary>Pista 2</summary><p>En Python las listas empiezan a contar en 0.</p></details></div>
+      <label class="ex-done"><input type="checkbox" id="bicho-7"><span>¡Cazado!</span></label>
+    </article>
+    <article class="bug-card">
+      <span class="kchip k-pra">Bicho 8</span>
+      <h4>MPU6050</h4>
+      <p class="bug-sym"><b>Síntoma:</b> <code>OSError: [Errno 19] ENODEV</code> al despertar el chip, aunque <code>scan()</code> sí lo encuentra.</p>
+      <p class="bug-run">Circuito <code>chips/2-mpu6050/wokwi.toml</code> · archivo <code>varita_bicho.py</code> · perfil <strong>🐞 Chip 2 · MPU6050 bicho — REMOTA GHI</strong></p>
+      <div class="hints"><details><summary>Pista 1</summary><p>La consola imprime los chips en decimal. Pasa 104 a hexadecimal.</p></details><details><summary>Pista 2</summary><p>Compara ese número con la constante <code>MPU</code>.</p></details></div>
+      <label class="ex-done"><input type="checkbox" id="bicho-8"><span>¡Cazado!</span></label>
+    </article>
+    <article class="bug-card">
+      <span class="kchip k-pra">Bicho 9</span>
+      <h4>UART</h4>
+      <p class="bug-sym"><b>Síntoma:</b> Cada mensaje llega con una vuelta de retraso.</p>
+      <p class="bug-run">Circuito <code>chips/4-uart/wokwi.toml</code> · archivo <code>mensaje_secreto_bicho.py</code> · perfil <strong>🐞 Chip 4 · UART bicho — REMOTA GHI</strong></p>
+      <div class="hints"><details><summary>Pista 1</summary><p>Avanza con F10 dentro del <code>for</code>. ¿Qué pasa primero: enviar o recibir?</p></details><details><summary>Pista 2</summary><p>¿Se puede recibir una palabra que todavía no se ha enviado?</p></details></div>
+      <label class="ex-done"><input type="checkbox" id="bicho-9"><span>¡Cazado!</span></label>
+    </article>
+    <article class="bug-card">
+      <span class="kchip k-pra">Bicho 10</span>
+      <h4>MAX7219</h4>
+      <p class="bug-sym"><b>Síntoma:</b> A los dibujos les falta una fila y salen corridos.</p>
+      <p class="bug-run">Circuito <code>chips/3-max7219/wokwi.toml</code> · archivo <code>calabaza_leds_bicho.py</code> · perfil <strong>🐞 Chip 3 · MAX7219 bicho — REMOTA GHI</strong></p>
+      <div class="hints"><details><summary>Pista 1</summary><p>Breakpoint dentro de <code>dibujar</code>: ¿a qué registro va la fila <code>numero = 0</code>?</p></details><details><summary>Pista 2</summary><p>En el MAX7219 las filas son los registros 1 a 8. El registro 0 no hace nada.</p></details></div>
+      <label class="ex-done"><input type="checkbox" id="bicho-10"><span>¡Cazado!</span></label>
+    </article>
+  </div>
+
+  <h3 class="sub-h" id="cripta">La cripta: varios chips en un mismo circuito</h3>
+  <p>Vas a armar un circuito con <strong>cuatro piezas a la vez</strong>: la OLED, un botón, un acelerómetro MPU6050 y un potenciómetro. No se conecta todo de golpe: agregas una pieza, compruebas que responde y solo entonces pasas a la siguiente. Así, si algo falla, sabes que fue lo último que tocaste.</p>
+  <div class="table-wrap"><table class="proto-table">
+    <thead><tr><th>Pieza</th><th>Tipo de señal</th><th>Pines del ESP32</th></tr></thead>
+    <tbody>
+      <tr><td>OLED</td><td>Bus I2C (0x3C = 60)</td><td>21 (SDA), 22 (SCL), 3V3, GND.1</td></tr>
+      <tr><td>Botón «Modo»</td><td>Digital</td><td>13, GND.1</td></tr>
+      <tr><td>MPU6050</td><td>Bus I2C (0x68 = 104), <strong>el mismo bus que la OLED</strong></td><td>21, 22, 3V3, GND.2</td></tr>
+      <tr><td>Potenciómetro</td><td>Analógica</td><td>34, 3V3, GND.2</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Varios cables pueden llegar al mismo pin cuando es un bus (21 y 22) o alimentación (3V3 y GND). Un pin de señal como el 13 o el 34 es de <em>una sola</em> pieza.</p>
+
+  <ol class="ruta">
+    <li class="blk teo">
+      <span class="kchip k-teo">Paso 0 · Base</span>
+      <h3>La OLED sola</h3>
+      <p>La carpeta <code>retos/cripta/</code> ya trae <code>wokwi.toml</code>, <code>ssd1306.py</code>, un <code>diagram.json</code> con el ESP32 y la OLED, y <code>cripta.py</code> con huecos marcados <code>PASO 1</code>, <code>PASO 2</code>…</p>
+      <div class="runbox"><b>Pruébalo:</b> <strong>Select Config File</strong> → <code>retos/cripta/wokwi.toml</code> → <strong>Start Simulation</strong>. Perfil <strong>Reto · La cripta (varios chips) — REMOTA GHI</strong>, F5 y F5. La OLED dice «Paso 0: OK» y la consola <code>Chips en el bus I2C: [60]</code>.</div>
+    </li>
+
+    <li class="blk con">
+      <span class="kchip k-con">Paso 1 · Botón</span>
+      <h3>El botón que cambia de modo</h3>
+      <p>Una entrada digital en el pin 13, como el caldero del Laboratorio.</p>
+      <div class="chip-conn"><svg class="mini-svg" viewBox="0 0 480 108" role="img" aria-label="Botón"><rect x="10" y="10" width="140" height="88" rx="8" class="pcb"/><text x="24" y="58" class="lbl">ESP32</text><rect x="330" y="10" width="140" height="88" rx="8" class="pcb"/><text x="456" y="58" class="lbl" text-anchor="end">Botón</text><line x1="150" y1="36" x2="330" y2="36" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="36" r="6" class="pin"/><text x="140" y="40" class="lbl-sm" text-anchor="end">13</text><circle cx="330" cy="36" r="6" class="pin"/><text x="340" y="40" class="lbl-sm">pata 1</text><line x1="150" y1="70" x2="330" y2="70" stroke="var(--w-gnd)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="70" r="6" class="pin"/><text x="140" y="74" class="lbl-sm" text-anchor="end">GND.1</text><circle cx="330" cy="70" r="6" class="pin"/><text x="340" y="74" class="lbl-sm">pata 2</text></svg><div><ul class="wiring"><li><span class="sw-dot" style="background:var(--accent)"></span>pata 1 → <b>13</b></li><li><span class="sw-dot" style="background:var(--w-gnd)"></span>pata 2 → <b>GND.1</b></li></ul></div></div>
+      <ol class="csteps"><li><div class="cstep-n">1</div><div class="cstep-b"><h4>Agregar la pieza</h4><p>En <code>retos/cripta/diagram.json</code>, dentro de <code>"parts"</code>: pon una <strong>coma</strong> al final de la última pieza y pega esta línea debajo.</p><div class="code"><span class="lang">json · diagram.json</span><button class="copy" type="button">Copiar</button><pre>{ "type": "wokwi-pushbutton", "id": "btn1", "top": 150, "left": -40, "attrs": { "color": "orange", "label": "Modo" } }</pre></div></div></li><li><div class="cstep-n">2</div><div class="cstep-b"><h4>Agregar los cables</h4><p>Dentro de <code>"connections"</code>: coma al final de la última conexión y pega estas líneas debajo (cada una termina en coma menos la última).</p><div class="code"><span class="lang">json · diagram.json</span><button class="copy" type="button">Copiar</button><pre>[ "btn1:1.l", "esp:13", "orange", [] ],
+[ "btn1:2.l", "esp:GND.1", "black", [] ]</pre></div></div></li><li><div class="cstep-n">3</div><div class="cstep-b"><h4>Agregar el código de la pieza</h4><p>En <code>cripta.py</code>, debajo del comentario <code># PASO 1 · pega aquí preparar_boton()</code>:</p><div class="code"><span class="lang">python · cripta.py, arriba</span><button class="copy" type="button">Copiar</button><pre><span class="c-kw">def</span> preparar_boton():
+    <span class="c-com"># Suelto = 1, pulsado = 0 (gracias a PULL_UP)</span>
+    <span class="c-kw">return</span> Pin(13, Pin.IN, Pin.PULL_UP)</pre></div></div></li><li><div class="cstep-n">4</div><div class="cstep-b"><h4>Prepararla dentro de main()</h4><p>Debajo del comentario <code># PASOS 1, 2 y 3 · prepara aquí cada pieza nueva</code>, después de lo que pegaste en los pasos anteriores (con 4 espacios de sangría):</p><div class="code"><span class="lang">python · cripta.py, dentro de main()</span><button class="copy" type="button">Copiar</button><pre>    boton = preparar_boton()
+    print(<span class="c-str">"Boton:"</span>, boton.value())  <span class="c-com"># suelto: 1</span></pre></div></div></li><li><div class="cstep-n">5</div><div class="cstep-b"><h4>Comprobar antes de seguir</h4><p>Detén la simulación, vuelve a darle <strong>Start Simulation</strong> (el circuito cambió) y lanza el perfil. La consola debe decir <code>Boton: 1</code>. Para ver el 0, pon un breakpoint en el <code>for</code>, mantén pulsado el botón y escribe <code>boton.value()</code> en Watch.</p></div></li></ol>
+    </li>
+    <li class="blk pro">
+      <span class="kchip k-pro">Paso 2 · MPU6050</span>
+      <h3>Un segundo chip en el mismo bus</h3>
+      <p>El MPU6050 se cuelga de <strong>los mismos cables</strong> SDA y SCL que la OLED. Cada chip sabe que le hablan a él por su dirección.</p>
+      <div class="chip-conn"><svg class="mini-svg" viewBox="0 0 480 176" role="img" aria-label="MPU6050"><rect x="10" y="10" width="140" height="156" rx="8" class="pcb"/><text x="24" y="92" class="lbl">ESP32</text><rect x="330" y="10" width="140" height="156" rx="8" class="pcb"/><text x="456" y="92" class="lbl" text-anchor="end">MPU6050</text><line x1="150" y1="36" x2="330" y2="36" stroke="var(--w-vcc)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="36" r="6" class="pin"/><text x="140" y="40" class="lbl-sm" text-anchor="end">3V3</text><circle cx="330" cy="36" r="6" class="pin"/><text x="340" y="40" class="lbl-sm">VCC</text><line x1="150" y1="70" x2="330" y2="70" stroke="var(--w-gnd)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="70" r="6" class="pin"/><text x="140" y="74" class="lbl-sm" text-anchor="end">GND.2</text><circle cx="330" cy="70" r="6" class="pin"/><text x="340" y="74" class="lbl-sm">GND</text><line x1="150" y1="104" x2="330" y2="104" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="104" r="6" class="pin"/><text x="140" y="108" class="lbl-sm" text-anchor="end">21</text><circle cx="330" cy="104" r="6" class="pin"/><text x="340" y="108" class="lbl-sm">SDA</text><line x1="150" y1="138" x2="330" y2="138" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="138" r="6" class="pin"/><text x="140" y="142" class="lbl-sm" text-anchor="end">22</text><circle cx="330" cy="138" r="6" class="pin"/><text x="340" y="142" class="lbl-sm">SCL</text></svg><div><ul class="wiring"><li><span class="sw-dot" style="background:var(--w-vcc)"></span>VCC → <b>3V3</b></li><li><span class="sw-dot" style="background:var(--w-gnd)"></span>GND → <b>GND.2</b></li><li><span class="sw-dot" style="background:var(--accent)"></span>SDA → <b>21</b></li><li><span class="sw-dot" style="background:var(--accent)"></span>SCL → <b>22</b></li></ul></div></div>
+      <ol class="csteps"><li><div class="cstep-n">1</div><div class="cstep-b"><h4>Agregar la pieza</h4><p>En <code>retos/cripta/diagram.json</code>, dentro de <code>"parts"</code>: pon una <strong>coma</strong> al final de la última pieza y pega esta línea debajo.</p><div class="code"><span class="lang">json · diagram.json</span><button class="copy" type="button">Copiar</button><pre>{ "type": "wokwi-mpu6050", "id": "imu1", "top": -40, "left": 380, "attrs": {} }</pre></div></div></li><li><div class="cstep-n">2</div><div class="cstep-b"><h4>Agregar los cables</h4><p>Dentro de <code>"connections"</code>: coma al final de la última conexión y pega estas líneas debajo (cada una termina en coma menos la última).</p><div class="code"><span class="lang">json · diagram.json</span><button class="copy" type="button">Copiar</button><pre>[ "imu1:VCC", "esp:3V3", "red", [] ],
+[ "imu1:GND", "esp:GND.2", "black", [] ],
+[ "imu1:SDA", "esp:21", "green", [] ],
+[ "imu1:SCL", "esp:22", "blue", [] ]</pre></div></div></li><li><div class="cstep-n">3</div><div class="cstep-b"><h4>Agregar el código de la pieza</h4><p>En <code>cripta.py</code>, debajo del comentario <code># PASO 2 · pega aquí despertar_mpu() y leer_inclinacion()</code>:</p><div class="code"><span class="lang">python · cripta.py, arriba</span><button class="copy" type="button">Copiar</button><pre>MPU = 0x68  <span class="c-com"># dirección del MPU6050 (104 en decimal)</span>
+
+
+<span class="c-kw">def</span> despertar_mpu(i2c):
+    i2c.writeto_mem(MPU, 0x6B, b<span class="c-str">"\x00"</span>)
+
+
+<span class="c-kw">def</span> leer_inclinacion(i2c):
+    <span class="c-com"># Aceleración en X: cerca de 0 = plano, positivo o negativo = inclinado</span>
+    datos = i2c.readfrom_mem(MPU, 0x3B, 2)
+    ax = (datos[0] &lt;&lt; 8) | datos[1]
+    <span class="c-kw">if</span> ax &gt; 32767:
+        ax -= 65536
+    <span class="c-kw">return</span> ax / 16384</pre></div></div></li><li><div class="cstep-n">4</div><div class="cstep-b"><h4>Prepararla dentro de main()</h4><p>Debajo del comentario <code># PASOS 1, 2 y 3 · prepara aquí cada pieza nueva</code>, después de lo que pegaste en los pasos anteriores (con 4 espacios de sangría):</p><div class="code"><span class="lang">python · cripta.py, dentro de main()</span><button class="copy" type="button">Copiar</button><pre>    despertar_mpu(i2c)
+    print(<span class="c-str">"Inclinacion:"</span>, leer_inclinacion(i2c))</pre></div></div></li><li><div class="cstep-n">5</div><div class="cstep-b"><h4>Comprobar antes de seguir</h4><p>Detén la simulación, vuelve a darle <strong>Start Simulation</strong> (el circuito cambió) y lanza el perfil. Ahora la consola debe mostrar <code>[60, 104]</code>: dos chips en un solo bus. Haz clic en el MPU6050 en Wokwi, mueve la aceleración X y vuelve a lanzar: cambia <code>Inclinacion</code>.</p></div></li></ol>
+    </li>
+    <li class="blk con">
+      <span class="kchip k-con">Paso 3 · Potenciómetro</span>
+      <h3>Una perilla analógica</h3>
+      <p>Una entrada analógica en el pin 34. Además del bloque de código, cambia la línea de importación para traer <code>ADC</code>.</p>
+      <div class="chip-conn"><svg class="mini-svg" viewBox="0 0 480 142" role="img" aria-label="Perilla"><rect x="10" y="10" width="140" height="122" rx="8" class="pcb"/><text x="24" y="75" class="lbl">ESP32</text><rect x="330" y="10" width="140" height="122" rx="8" class="pcb"/><text x="456" y="75" class="lbl" text-anchor="end">Perilla</text><line x1="150" y1="36" x2="330" y2="36" stroke="var(--w-vcc)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="36" r="6" class="pin"/><text x="140" y="40" class="lbl-sm" text-anchor="end">3V3</text><circle cx="330" cy="36" r="6" class="pin"/><text x="340" y="40" class="lbl-sm">VCC</text><line x1="150" y1="70" x2="330" y2="70" stroke="var(--w-gnd)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="70" r="6" class="pin"/><text x="140" y="74" class="lbl-sm" text-anchor="end">GND.2</text><circle cx="330" cy="70" r="6" class="pin"/><text x="340" y="74" class="lbl-sm">GND</text><line x1="150" y1="104" x2="330" y2="104" stroke="var(--k-teo)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="104" r="6" class="pin"/><text x="140" y="108" class="lbl-sm" text-anchor="end">34</text><circle cx="330" cy="104" r="6" class="pin"/><text x="340" y="108" class="lbl-sm">SIG</text></svg><div><ul class="wiring"><li><span class="sw-dot" style="background:var(--w-vcc)"></span>VCC → <b>3V3</b></li><li><span class="sw-dot" style="background:var(--w-gnd)"></span>GND → <b>GND.2</b></li><li><span class="sw-dot" style="background:var(--k-teo)"></span>SIG → <b>34</b></li></ul></div></div>
+      <ol class="csteps"><li><div class="cstep-n">1</div><div class="cstep-b"><h4>Agregar la pieza</h4><p>En <code>retos/cripta/diagram.json</code>, dentro de <code>"parts"</code>: pon una <strong>coma</strong> al final de la última pieza y pega esta línea debajo.</p><div class="code"><span class="lang">json · diagram.json</span><button class="copy" type="button">Copiar</button><pre>{ "type": "wokwi-potentiometer", "id": "pot1", "top": 150, "left": 380, "attrs": { "value": "512" } }</pre></div></div></li><li><div class="cstep-n">2</div><div class="cstep-b"><h4>Agregar los cables</h4><p>Dentro de <code>"connections"</code>: coma al final de la última conexión y pega estas líneas debajo (cada una termina en coma menos la última).</p><div class="code"><span class="lang">json · diagram.json</span><button class="copy" type="button">Copiar</button><pre>[ "pot1:VCC", "esp:3V3", "red", [] ],
+[ "pot1:GND", "esp:GND.2", "black", [] ],
+[ "pot1:SIG", "esp:34", "purple", [] ]</pre></div></div></li><li><div class="cstep-n">3</div><div class="cstep-b"><h4>Agregar el código de la pieza</h4><p>En <code>cripta.py</code>, debajo del comentario <code># PASO 3 · pega aquí preparar_perilla() y leer_porcentaje()</code>:</p><div class="code"><span class="lang">python · cripta.py, arriba</span><button class="copy" type="button">Copiar</button><pre><span class="c-kw">def</span> preparar_perilla():
+    adc = ADC(Pin(34))
+    adc.atten(ADC.ATTN_11DB)
+    <span class="c-kw">return</span> adc
+
+
+<span class="c-kw">def</span> leer_porcentaje(adc):
+    <span class="c-kw">return</span> adc.read_u16() * 100 // 65535</pre></div><p>Y arriba del todo cambia la importación:</p><div class="code"><span class="lang">python · cripta.py, línea de importación</span><button class="copy" type="button">Copiar</button><pre><span class="c-kw">from</span> machine <span class="c-kw">import</span> Pin, I2C, ADC</pre></div></div></li><li><div class="cstep-n">4</div><div class="cstep-b"><h4>Prepararla dentro de main()</h4><p>Debajo del comentario <code># PASOS 1, 2 y 3 · prepara aquí cada pieza nueva</code>, después de lo que pegaste en los pasos anteriores (con 4 espacios de sangría):</p><div class="code"><span class="lang">python · cripta.py, dentro de main()</span><button class="copy" type="button">Copiar</button><pre>    adc = preparar_perilla()
+    print(<span class="c-str">"Perilla:"</span>, leer_porcentaje(adc), <span class="c-str">"%"</span>)</pre></div></div></li><li><div class="cstep-n">5</div><div class="cstep-b"><h4>Comprobar antes de seguir</h4><p>Detén la simulación, vuelve a darle <strong>Start Simulation</strong> (el circuito cambió) y lanza el perfil. La consola dice <code>Perilla: 50 %</code> más o menos. Mueve la perilla, vuelve a lanzar y comprueba que cambia.</p></div></li></ol>
+    </li>
+    <li class="blk pra">
+      <span class="kchip k-pra">Paso 4 · Reto propuesto</span>
+      <h3>La cripta completa</h3>
+      <p>Ya tienes las cuatro piezas respondiendo. Ahora escribe tú el código dentro del <code>for</code>, donde dice <code>PASO 4</code>:</p>
+      <ul class="checklist">
+        <li>El programa empieza en <strong>modo varita</strong>: un cuadrito de 8 × 8 se mueve a izquierda o derecha según la inclinación del MPU6050.</li>
+        <li>Cada vez que pulsas el botón cambia a <strong>modo volumen</strong>: la OLED muestra el porcentaje de la perilla y una barra. Otro clic vuelve a varita.</li>
+        <li>La primera línea de la pantalla dice en qué modo estás.</li>
+        <li>Nada se sale de la pantalla (128 × 64) y el texto cabe en 16 letras por línea.</li>
+      </ul>
+      <div class="hints">
+        <details><summary>Pista 1</summary><p>Necesitas una variable <code>modo</code> creada <em>antes</em> del <code>for</code>. Para detectar el clic, reutiliza la idea de <code>antes</code> y <code>ahora</code> del caldero.</p></details>
+        <details><summary>Pista 2</summary><p>Dentro del <code>for</code>: <code>display.fill(0)</code>, luego un <code>if modo == ___:</code> con lo de cada modo, y al final <code>display.show()</code>.</p></details>
+        <details><summary>Pista 3</summary><p>Para mover el cuadrito: la inclinación va más o menos de −1 a 1. Mírala en Variables y piensa cómo convertirla en una x entre 0 y 120. La barra ya la hiciste en el Laboratorio de sensores.</p></details>
+      </div>
+      <p class="note"><b>Extra:</b> agrega un tercer modo con el PIR o el sensor de luz. Antes de tocar <code>diagram.json</code>, escribe en la tabla de pines qué pin usarás y comprueba que nadie más lo usa.</p>
+      <label class="ex-done"><input type="checkbox" id="cripta-1"><span>¡Cripta completa!</span></label>
+    </li>
+  </ol>
+</section>
+
 <footer class="sources">
   <strong>Enlaces</strong>
   <ul>
-    <li>Archivos: <a href="https://github.com/Cassers/luka-wokwi-oled-debug">Cassers/luka-wokwi-oled-debug</a> · <a href="https://github.com/Cassers/luka-wokwi-oled-debug/tree/main/chips">carpeta chips</a> · <a href="https://github.com/Cassers/luka-wokwi-oled-debug/tree/main/sensores">carpeta sensores</a> · <a href="https://github.com/Cassers/luka-wokwi-oled-debug/blob/main/MicroPython-debug/practica.py">practica.py</a> · <a href="https://github.com/Cassers/luka-wokwi-oled-debug/blob/main/MicroPython-debug/oled_demo.py">oled_demo.py</a>.</li>
+    <li>Archivos: <a href="https://github.com/Cassers/luka-wokwi-oled-debug">Cassers/luka-wokwi-oled-debug</a> · <a href="https://github.com/Cassers/luka-wokwi-oled-debug/tree/main/chips">carpeta chips</a> · <a href="https://github.com/Cassers/luka-wokwi-oled-debug/tree/main/sensores">carpeta sensores</a> · <a href="https://github.com/Cassers/luka-wokwi-oled-debug/tree/main/retos/cripta">carpeta retos/cripta</a> · <a href="https://github.com/Cassers/luka-wokwi-oled-debug/blob/main/MicroPython-debug/practica.py">practica.py</a> · <a href="https://github.com/Cassers/luka-wokwi-oled-debug/blob/main/MicroPython-debug/oled_demo.py">oled_demo.py</a>.</li>
     <li><a href="https://docs.micropython.org/en/latest/library/framebuf.html">MicroPython: funciones de dibujo (framebuf)</a> · <a href="https://docs.wokwi.com/vscode/getting-started">Wokwi para VS Code</a>.</li>
     <li>La depuración remota GHI + Wokwi es experimental: si algo raro pasa, avisa a tu tutor con el mensaje completo.</li>
   </ul>

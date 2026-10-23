@@ -1,0 +1,6 @@
+# Reto «La cripta»: varios chips en un mismo circuito. Iniciar con Start Simulation, NO con GDB.
+# Cada vez que cambies diagram.json: detén la simulación y vuelve a iniciarla.
+[wokwi]
+version = 1
+firmware = "../../.tools/ghi-debug/micropython-esp32-generic-uart0-v1.29.0-16-g201fc48cf9.bin"
+rfc2217ServerPort = 4000

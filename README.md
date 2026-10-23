@@ -24,6 +24,8 @@ tools/wokwi_debug_bridge.py   puente RFC2217 → PTY (Linux)
 MicroPython-debug/    demo OLED, practica.py (ejercicios), controlador ssd1306, circuito Wokwi y guía
 chips/                4 circuitos extra: DHT22, MPU6050 (I2C), MAX7219 (SPI), UART
 sensores/             6 sensores por tipo de señal: botón, PIR, potenciómetro, LDR, HC-SR04, DS18B20
+*_bicho.py            junto a cada chip y sensor: copia con UN error a propósito (reto «caza el bicho»)
+retos/cripta/         reto de varios chips: se arma pieza por pieza siguiendo la guía
 index.html            la guía web (GitHub Pages)
 ```
 
@@ -38,6 +40,12 @@ Cada carpeta de `chips/` trae su programa, `diagram.json`, `wokwi.toml` y perfil
 ## Laboratorio de sensores
 
 Cada carpeta de `sensores/` trae su programa, `diagram.json`, `wokwi.toml` y perfil (**Sensor N · … — REMOTA GHI**). En Wokwi: Select Config File → `sensores/<carpeta>/wokwi.toml`. Explicación en la guía web, sección «Laboratorio de sensores».
+
+## Retos
+
+- **Caza el bicho:** cada `*_bicho.py` tiene un error escondido. Usa el circuito de su misma carpeta y el perfil **🐞 … bicho — REMOTA GHI**; encuéntralo con breakpoints y Variables. Síntomas y pistas en la guía, sección «Caza el bicho y arma la cripta».
+- **La cripta:** `retos/cripta/` empieza solo con ESP32 + OLED. La guía indica, paso a paso, qué pieza y cables agregar a `diagram.json` y qué código pegar en `cripta.py` (botón, MPU6050 en el mismo bus I2C, potenciómetro). El paso final es un reto propuesto. Perfil: **Reto · La cripta (varios chips) — REMOTA GHI**.
+- **Regla de oro:** el `wokwi.toml` elegido en Select Config File y el perfil lanzado deben ser de la misma carpeta.
 
 ## Qué NO contiene (lo preparas tú siguiendo la guía)
 
