@@ -456,6 +456,7 @@ html { scroll-behavior: smooth; }
       <a class="btn-ghost" href="#pines">Cómo funcionan los pines</a>
       <a class="btn-ghost" href="#practica">Ruta de práctica</a>
       <a class="btn-ghost" href="#chips">Otros chips</a>
+      <a class="btn-ghost" href="#sensores">Sensores</a>
       <a class="btn-ghost" href="https://github.com/Cassers/luka-wokwi-oled-debug">Archivos en GitHub</a>
     </div>
   </div>
@@ -1412,10 +1413,457 @@ FANTASMA = [
   <p class="note">Estos circuitos y programas se prepararon con la misma configuración de la demo, pero aún no se han probado en tu Wokwi. Si algo no responde, revisa primero los cables con la receta de 5 pasos y avisa a tu tutor con el mensaje completo.</p>
 </section>
 
+<section class="sens-sec" id="sensores" aria-labelledby="sens-t">
+  <p class="eyebrow">Laboratorio</p>
+  <h2 class="section-title" id="sens-t">Laboratorio de sensores</h2>
+  <p class="section-sub">Seis sensores distintos, ordenados por el tipo de señal que dan. Cada uno trae su circuito en Wokwi, el código completo y una práctica. Están en la carpeta <code>sensores/</code> del repositorio (haz <code>git pull</code> para traerla).</p>
+
+  <ol class="ruta">
+    <li class="blk teo">
+      <span class="kchip k-teo">Teoría</span>
+      <h3>Cuatro formas de contar lo que pasa</h3>
+      <div class="table-wrap"><table class="proto-table">
+        <thead><tr><th>Señal</th><th>Cómo es</th><th>Cómo se lee en MicroPython</th><th>Sensores</th></tr></thead>
+        <tbody>
+          <tr><td>Digital</td><td>Solo dos valores: 0 o 1</td><td><code>Pin(n, Pin.IN).value()</code></td><td>Botón, PIR</td></tr>
+          <tr><td>Analógica</td><td>Muchos valores: un voltaje entre 0 y 3,3 V</td><td><code>ADC(Pin(n)).read_u16()</code> → 0 a 65535</td><td>Potenciómetro, fotorresistencia</td></tr>
+          <tr><td>Pulsos</td><td>La información está en <em>cuánto dura</em> un 1</td><td><code>time_pulse_us(pin, 1)</code> → microsegundos</td><td>Ultrasonido HC-SR04</td></tr>
+          <tr><td>Bus</td><td>Mensajes con números, como I2C o 1-Wire</td><td>Un módulo que habla el idioma: <code>onewire</code>, <code>ds18x20</code></td><td>DS18B20</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Solo algunos pines pueden leer señales analógicas. Aquí usamos el 34 y el 35, que son «solo entrada» (míralos en el <a href="#mapa-pines">mapa de pines</a>).</p>
+    </li>
+
+    <li class="blk con">
+      <span class="kchip k-con">Concepto nuevo · Digital</span>
+      <h3>Sensor 1 · Botón, el caldero de ingredientes</h3>
+      <p>Un botón es el sensor más sencillo: <strong>pulsado o suelto</strong>. Cada vez que lo pulsas, el caldero suma un ingrediente.</p>
+      <div class="chip-conn"><svg class="mini-svg" viewBox="0 0 480 108" role="img" aria-label="Botón entre el pin 13 y GND"><rect x="10" y="10" width="140" height="88" rx="8" class="pcb"/><text x="24" y="58" class="lbl">ESP32</text><rect x="330" y="10" width="140" height="88" rx="8" class="pcb"/><text x="456" y="58" class="lbl" text-anchor="end">Botón</text><line x1="150" y1="36" x2="330" y2="36" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="36" r="6" class="pin"/><text x="140" y="40" class="lbl-sm" text-anchor="end">13</text><circle cx="330" cy="36" r="6" class="pin"/><text x="340" y="40" class="lbl-sm">pata 1</text><line x1="150" y1="70" x2="330" y2="70" stroke="var(--w-gnd)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="70" r="6" class="pin"/><text x="140" y="74" class="lbl-sm" text-anchor="end">GND</text><circle cx="330" cy="70" r="6" class="pin"/><text x="340" y="74" class="lbl-sm">pata 2</text></svg><div><ul class="wiring"><li><span class="sw-dot" style="background:var(--accent)"></span>pata 1 → <b>13</b></li><li><span class="sw-dot" style="background:var(--w-gnd)"></span>pata 2 → <b>GND</b></li></ul></div></div><p class="note">La OLED va conectada como siempre (21, 22, 3V3 y GND) para mostrar los valores.</p>
+      <h4 class="ch4">Configurar la lectura, paso a paso</h4>
+      <ol class="csteps"><li><div class="cstep-n">1</div><div class="cstep-b"><h4>Preparar el pin como entrada con PULL_UP</h4><p>Una resistencia interna deja el pin en <strong>1</strong> mientras nadie pulsa. Al pulsar, el botón lo une con GND y se lee <strong>0</strong>. Por eso el botón no necesita cable a 3V3.</p><div class="code"><span class="lang">python</span><pre>boton = Pin(13, Pin.IN, Pin.PULL_UP)</pre></div></div></li><li><div class="cstep-n">2</div><div class="cstep-b"><h4>Leer</h4><p><code>value()</code> devuelve 1 (suelto) o 0 (pulsado).</p><div class="code"><span class="lang">python</span><pre>ahora = boton.value()</pre></div></div></li><li><div class="cstep-n">3</div><div class="cstep-b"><h4>Detectar el momento de pulsar</h4><p>Si solo miras si está en 0, contarías muchas veces mientras lo mantienes. Hay que comparar con la lectura anterior: estaba en 1 y ahora está en 0.</p><div class="code"><span class="lang">python</span><pre><span class="c-kw">if</span> antes == 1 <span class="c-kw">and</span> ahora == 0:
+    ingredientes += 1
+antes = ahora</pre></div></div></li><li><div class="cstep-n">4</div><div class="cstep-b"><h4>Esperar un poquito entre lecturas</h4><p>Al pulsar, el metal «rebota» y da varios 0 y 1 muy rápidos. 20 ms de pausa entre lecturas lo evitan.</p><div class="code"><span class="lang">python</span><pre>time.sleep_ms(20)</pre></div></div></li></ol>
+      <details class="full"><summary>Ver el archivo completo: <code>sensores/1-boton/caldero.py</code></summary><div class="code"><span class="lang">python · caldero.py</span><button class="copy" type="button">Copiar</button><pre><span class="c-com"># Sensor 1 · Botón: el caldero de ingredientes.</span>
+<span class="c-com"># Señal DIGITAL: solo hay dos estados, 1 (suelto) o 0 (pulsado).</span>
+<span class="c-kw">import</span> time
+<span class="c-kw">from</span> machine <span class="c-kw">import</span> Pin, I2C
+<span class="c-kw">import</span> ssd1306
+
+
+<span class="c-kw">def</span> preparar_pantalla():
+    i2c = I2C(0, scl=Pin(22), sda=Pin(21), freq=400000)
+    <span class="c-kw">return</span> ssd1306.SSD1306_I2C(128, 64, i2c)
+
+
+<span class="c-kw">def</span> preparar_boton():
+    <span class="c-com"># PULL_UP: una resistencia interna deja el pin en 1 mientras nadie pulsa.</span>
+    <span class="c-com"># Al pulsar, el botón une el pin con GND y se lee 0.</span>
+    <span class="c-kw">return</span> Pin(13, Pin.IN, Pin.PULL_UP)
+
+
+<span class="c-kw">def</span> mostrar(display, ingredientes):
+    display.fill(0)
+    display.text(<span class="c-str">"Caldero"</span>, 36, 0, 1)
+    display.text(<span class="c-str">"Ingredientes: %d"</span> % ingredientes, 0, 28, 1)
+    <span class="c-kw">if</span> ingredientes &gt;= 5:
+        display.text(<span class="c-str">"Pocion lista!"</span>, 12, 48, 1)
+    display.show()
+
+
+<span class="c-kw">def</span> main():
+    display = preparar_pantalla()
+    boton = preparar_boton()
+    ingredientes = 0
+    antes = 1
+    mostrar(display, ingredientes)
+    <span class="c-kw">for</span> vuelta <span class="c-kw">in</span> range(3000):  <span class="c-com"># unos 60 segundos</span>
+        ahora = boton.value()
+        <span class="c-kw">if</span> antes == 1 <span class="c-kw">and</span> ahora == 0:  <span class="c-com"># justo en el momento de pulsar</span>
+            ingredientes += 1
+            mostrar(display, ingredientes)  <span class="c-com"># breakpoint aquí</span>
+        antes = ahora
+        time.sleep_ms(20)  <span class="c-com"># 20 ms de pausa también evitan los rebotes del botón</span>
+
+
+<span class="c-kw">if</span> __name__ == <span class="c-str">"__main__"</span>:
+    main()</pre></div></details>
+      <div class="runbox"><b>Para probarlo:</b> en Wokwi, <strong>Select Config File</strong> → <code>sensores/1-boton/wokwi.toml</code> y <strong>Start Simulation</strong>. Luego elige <strong>Sensor 1 · Botón caldero — REMOTA GHI</strong>. Pulsa el botón naranja con el ratón.</div>
+    </li>
+    <li class="blk pra">
+      <span class="kchip k-pra">Práctica · Sensor 1</span>
+      <h3>Una poción más difícil</h3>
+      <p>En <code>caldero.py</code>, haz que la poción necesite más ingredientes y que cada pulsación sume dos:</p>
+      <div class="code"><span class="lang">python · caldero.py</span><button class="copy" type="button">Copiar</button><pre>            ingredientes += <span class="blank">___</span>
+...
+    <span class="c-kw">if</span> ingredientes &gt;= <span class="blank">___</span>:
+        display.text(<span class="c-str">"Pocion lista!"</span>, 12, 48, 1)</pre></div>
+      <div class="hints"><details><summary>Pista 1</summary><p><code>+= 2</code> suma dos a lo que ya había.</p></details><details><summary>Pista 2</summary><p>Elige una meta par, por ejemplo 10. ¿Cuántas pulsaciones necesitas?</p></details><details><summary>Pista 3</summary><p>Pon un breakpoint en <code>ingredientes += ...</code> y mira el valor antes y después con <kbd>F10</kbd>.</p></details></div>
+      <p class="check"><strong>Comprueba:</strong> ¿qué pasa si quitas el <code>time.sleep_ms(20)</code> y pulsas varias veces?</p>
+      <label class="ex-done"><input type="checkbox" id="sensor-1"><span>¡Lo logré!</span></label>
+    </li>
+
+    <li class="blk pro">
+      <span class="kchip k-pro">Profundización · Digital</span>
+      <h3>Sensor 2 · PIR, el detector de fantasmas</h3>
+      <p>El sensor PIR detecta el calor de un cuerpo que se mueve. También es digital: su salida <strong>OUT</strong> se pone en 1 unos segundos cuando hay movimiento. Lo nuevo aquí son los <strong>flancos</strong>: el cambio de 0 a 1 (alguien llegó) y de 1 a 0 (se fue).</p>
+      <div class="chip-conn"><svg class="mini-svg" viewBox="0 0 480 142" role="img" aria-label="PIR: VCC a 5V, GND y OUT al pin 26"><rect x="10" y="10" width="140" height="122" rx="8" class="pcb"/><text x="24" y="75" class="lbl">ESP32</text><rect x="330" y="10" width="140" height="122" rx="8" class="pcb"/><text x="456" y="75" class="lbl" text-anchor="end">PIR</text><line x1="150" y1="36" x2="330" y2="36" stroke="var(--w-vcc)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="36" r="6" class="pin"/><text x="140" y="40" class="lbl-sm" text-anchor="end">5V</text><circle cx="330" cy="36" r="6" class="pin"/><text x="340" y="40" class="lbl-sm">VCC</text><line x1="150" y1="70" x2="330" y2="70" stroke="var(--w-gnd)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="70" r="6" class="pin"/><text x="140" y="74" class="lbl-sm" text-anchor="end">GND</text><circle cx="330" cy="70" r="6" class="pin"/><text x="340" y="74" class="lbl-sm">GND</text><line x1="150" y1="104" x2="330" y2="104" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="104" r="6" class="pin"/><text x="140" y="108" class="lbl-sm" text-anchor="end">26</text><circle cx="330" cy="104" r="6" class="pin"/><text x="340" y="108" class="lbl-sm">OUT</text></svg><div><ul class="wiring"><li><span class="sw-dot" style="background:var(--w-vcc)"></span>VCC → <b>5V</b></li><li><span class="sw-dot" style="background:var(--w-gnd)"></span>GND → <b>GND</b></li><li><span class="sw-dot" style="background:var(--accent)"></span>OUT → <b>26</b></li></ul></div></div><p class="note">La OLED va conectada como siempre (21, 22, 3V3 y GND) para mostrar los valores.</p>
+      <h4 class="ch4">Configurar la lectura, paso a paso</h4>
+      <ol class="csteps"><li><div class="cstep-n">1</div><div class="cstep-b"><h4>Preparar el pin</h4><p>El PIR da su propia señal de 0 o 1, así que no hace falta PULL_UP.</p><div class="code"><span class="lang">python</span><pre>pir = Pin(26, Pin.IN)</pre></div></div></li><li><div class="cstep-n">2</div><div class="cstep-b"><h4>Contar solo el flanco de subida</h4><p>Así cada movimiento cuenta una sola vez, aunque OUT siga en 1 varios segundos.</p><div class="code"><span class="lang">python</span><pre><span class="c-kw">if</span> antes == 0 <span class="c-kw">and</span> ahora == 1:
+    sustos += 1</pre></div></div></li><li><div class="cstep-n">3</div><div class="cstep-b"><h4>Mostrar el estado actual</h4><p>Para la pantalla basta saber si ahora está en 1.</p><div class="code"><span class="lang">python</span><pre>mostrar(display, ahora == 1, sustos)</pre></div></div></li></ol>
+      <details class="full"><summary>Ver el archivo completo: <code>sensores/2-pir/detector.py</code></summary><div class="code"><span class="lang">python · detector.py</span><button class="copy" type="button">Copiar</button><pre><span class="c-com"># Sensor 2 · PIR: el detector de fantasmas.</span>
+<span class="c-com"># Señal DIGITAL: el sensor pone su salida en 1 cuando detecta movimiento.</span>
+<span class="c-kw">import</span> time
+<span class="c-kw">from</span> machine <span class="c-kw">import</span> Pin, I2C
+<span class="c-kw">import</span> ssd1306
+
+
+<span class="c-kw">def</span> preparar_pantalla():
+    i2c = I2C(0, scl=Pin(22), sda=Pin(21), freq=400000)
+    <span class="c-kw">return</span> ssd1306.SSD1306_I2C(128, 64, i2c)
+
+
+<span class="c-kw">def</span> preparar_pir():
+    <span class="c-kw">return</span> Pin(26, Pin.IN)
+
+
+<span class="c-kw">def</span> mostrar(display, hay_movimiento, sustos):
+    display.fill(0)
+    display.text(<span class="c-str">"Detector"</span>, 32, 0, 1)
+    <span class="c-kw">if</span> hay_movimiento:
+        display.text(<span class="c-str">"FANTASMA!"</span>, 28, 24, 1)
+    <span class="c-kw">else</span>:
+        display.text(<span class="c-str">"Todo tranquilo"</span>, 8, 24, 1)
+    display.text(<span class="c-str">"Sustos: %d"</span> % sustos, 0, 48, 1)
+    display.show()
+
+
+<span class="c-kw">def</span> main():
+    display = preparar_pantalla()
+    pir = preparar_pir()
+    sustos = 0
+    antes = 0
+    <span class="c-kw">for</span> vuelta <span class="c-kw">in</span> range(600):  <span class="c-com"># unos 60 segundos</span>
+        ahora = pir.value()
+        <span class="c-kw">if</span> antes == 0 <span class="c-kw">and</span> ahora == 1:  <span class="c-com"># flanco de subida: empieza un movimiento</span>
+            sustos += 1  <span class="c-com"># breakpoint aquí</span>
+        mostrar(display, ahora == 1, sustos)
+        antes = ahora
+        time.sleep_ms(100)
+
+
+<span class="c-kw">if</span> __name__ == <span class="c-str">"__main__"</span>:
+    main()</pre></div></details>
+      <div class="runbox"><b>Para probarlo:</b> en Wokwi, <strong>Select Config File</strong> → <code>sensores/2-pir/wokwi.toml</code> y <strong>Start Simulation</strong>. Luego elige <strong>Sensor 2 · PIR detector — REMOTA GHI</strong>. Haz clic en el PIR y pulsa <strong>Simulate Motion</strong>.</div>
+    </li>
+    <li class="blk pra">
+      <span class="kchip k-pra">Práctica · Sensor 2</span>
+      <h3>¿Cuándo se fue el fantasma?</h3>
+      <p>Añade en <code>main</code> un aviso cuando termina el movimiento (flanco de bajada):</p>
+      <div class="code"><span class="lang">python · detector.py</span><button class="copy" type="button">Copiar</button><pre>        <span class="c-kw">if</span> antes == <span class="blank">___</span> <span class="c-kw">and</span> ahora == <span class="blank">___</span>:
+            print(<span class="c-str">"El fantasma se fue"</span>)</pre></div>
+      <div class="hints"><details><summary>Pista 1</summary><p>Es al revés que el flanco de subida.</p></details><details><summary>Pista 2</summary><p>Antes estaba en 1 y ahora está en 0.</p></details></div>
+      <p class="check"><strong>Comprueba:</strong> en el monitor serie aparece el aviso unos segundos después de cada «FANTASMA!». ¿Cuántos segundos? Busca <code>delayTime</code> en <code>diagram.json</code>.</p>
+      <label class="ex-done"><input type="checkbox" id="sensor-2"><span>¡Lo logré!</span></label>
+    </li>
+
+    <li class="blk con">
+      <span class="kchip k-con">Concepto nuevo · Analógica</span>
+      <h3>Sensor 3 · Potenciómetro, la perilla del grito</h3>
+      <p>Un potenciómetro es una perilla: al girarla cambia el voltaje en su pata central (<strong>SIG</strong>) entre 0 y 3,3 V. El ESP32 lo convierte en un número con su <strong>ADC</strong> (convertidor analógico a digital).</p>
+      <div class="chip-conn"><svg class="mini-svg" viewBox="0 0 480 142" role="img" aria-label="Potenciómetro: VCC a 3V3, GND y SIG al pin 34"><rect x="10" y="10" width="140" height="122" rx="8" class="pcb"/><text x="24" y="75" class="lbl">ESP32</text><rect x="330" y="10" width="140" height="122" rx="8" class="pcb"/><text x="456" y="75" class="lbl" text-anchor="end">Potenciómetro</text><line x1="150" y1="36" x2="330" y2="36" stroke="var(--w-vcc)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="36" r="6" class="pin"/><text x="140" y="40" class="lbl-sm" text-anchor="end">3V3</text><circle cx="330" cy="36" r="6" class="pin"/><text x="340" y="40" class="lbl-sm">VCC</text><line x1="150" y1="70" x2="330" y2="70" stroke="var(--w-gnd)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="70" r="6" class="pin"/><text x="140" y="74" class="lbl-sm" text-anchor="end">GND</text><circle cx="330" cy="70" r="6" class="pin"/><text x="340" y="74" class="lbl-sm">GND</text><line x1="150" y1="104" x2="330" y2="104" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="104" r="6" class="pin"/><text x="140" y="108" class="lbl-sm" text-anchor="end">34</text><circle cx="330" cy="104" r="6" class="pin"/><text x="340" y="108" class="lbl-sm">SIG</text></svg><div><ul class="wiring"><li><span class="sw-dot" style="background:var(--w-vcc)"></span>VCC → <b>3V3</b></li><li><span class="sw-dot" style="background:var(--w-gnd)"></span>GND → <b>GND</b></li><li><span class="sw-dot" style="background:var(--accent)"></span>SIG → <b>34</b></li></ul></div></div><p class="note">La OLED va conectada como siempre (21, 22, 3V3 y GND) para mostrar los valores.</p>
+      <h4 class="ch4">Configurar la lectura, paso a paso</h4>
+      <ol class="csteps"><li><div class="cstep-n">1</div><div class="cstep-b"><h4>Crear el ADC en un pin analógico</h4><p>No todos los pines sirven: el 34 sí.</p><div class="code"><span class="lang">python</span><pre>adc = ADC(Pin(34))</pre></div></div></li><li><div class="cstep-n">2</div><div class="cstep-b"><h4>Elegir el rango</h4><p>Por defecto el ADC solo mide hasta poco más de 1 V. <code>ATTN_11DB</code> le deja medir hasta unos 3,3 V.</p><div class="code"><span class="lang">python</span><pre>adc.atten(ADC.ATTN_11DB)</pre></div></div></li><li><div class="cstep-n">3</div><div class="cstep-b"><h4>Leer el número</h4><p><code>read_u16()</code> da un número de 0 (0 V) a 65535 (máximo).</p><div class="code"><span class="lang">python</span><pre>crudo = adc.read_u16()</pre></div></div></li><li><div class="cstep-n">4</div><div class="cstep-b"><h4>Convertirlo en algo útil</h4><p>Una regla de tres lo pasa a porcentaje. <code>//</code> divide sin decimales.</p><div class="code"><span class="lang">python</span><pre>porcentaje = crudo * 100 // 65535</pre></div></div></li></ol>
+      <details class="full"><summary>Ver el archivo completo: <code>sensores/3-potenciometro/perilla.py</code></summary><div class="code"><span class="lang">python · perilla.py</span><button class="copy" type="button">Copiar</button><pre><span class="c-com"># Sensor 3 · Potenciómetro: la perilla del grito.</span>
+<span class="c-com"># Señal ANALÓGICA: el voltaje puede tener muchos valores entre 0 y 3,3 V.</span>
+<span class="c-kw">from</span> machine <span class="c-kw">import</span> ADC
+<span class="c-kw">import</span> time
+<span class="c-kw">from</span> machine <span class="c-kw">import</span> Pin, I2C
+<span class="c-kw">import</span> ssd1306
+
+
+<span class="c-kw">def</span> preparar_pantalla():
+    i2c = I2C(0, scl=Pin(22), sda=Pin(21), freq=400000)
+    <span class="c-kw">return</span> ssd1306.SSD1306_I2C(128, 64, i2c)
+
+
+<span class="c-kw">def</span> preparar_perilla():
+    adc = ADC(Pin(34))
+    adc.atten(ADC.ATTN_11DB)  <span class="c-com"># permite leer todo el rango, de 0 a unos 3,3 V</span>
+    <span class="c-kw">return</span> adc
+
+
+<span class="c-kw">def</span> leer_porcentaje(adc):
+    crudo = adc.read_u16()  <span class="c-com"># número de 0 a 65535</span>
+    <span class="c-kw">return</span> crudo * 100 // 65535
+
+
+<span class="c-kw">def</span> mostrar(display, porcentaje):
+    display.fill(0)
+    display.text(<span class="c-str">"Volumen grito"</span>, 12, 0, 1)
+    display.text(<span class="c-str">"%d %%"</span> % porcentaje, 52, 20, 1)
+    display.rect(4, 40, 120, 12, 1)
+    display.fill_rect(4, 40, porcentaje * 120 // 100, 12, 1)
+    display.show()
+
+
+<span class="c-kw">def</span> main():
+    display = preparar_pantalla()
+    adc = preparar_perilla()
+    <span class="c-kw">for</span> vuelta <span class="c-kw">in</span> range(300):  <span class="c-com"># unos 60 segundos</span>
+        porcentaje = leer_porcentaje(adc)
+        mostrar(display, porcentaje)  <span class="c-com"># breakpoint aquí</span>
+        time.sleep_ms(200)
+
+
+<span class="c-kw">if</span> __name__ == <span class="c-str">"__main__"</span>:
+    main()</pre></div></details>
+      <div class="runbox"><b>Para probarlo:</b> en Wokwi, <strong>Select Config File</strong> → <code>sensores/3-potenciometro/wokwi.toml</code> y <strong>Start Simulation</strong>. Luego elige <strong>Sensor 3 · Potenciómetro perilla — REMOTA GHI</strong>. Haz clic en la perilla y gírala con las flechas ← →.</div>
+    </li>
+    <li class="blk pra">
+      <span class="kchip k-pra">Práctica · Sensor 3</span>
+      <h3>Nivel de miedo del 0 al 10</h3>
+      <p>Dentro de <code>mostrar</code>, añade un nivel de miedo calculado a partir del porcentaje:</p>
+      <div class="code"><span class="lang">python · perilla.py</span><button class="copy" type="button">Copiar</button><pre>    nivel = porcentaje * <span class="blank">___</span> // 100
+    display.text(<span class="c-str">"Miedo: %d"</span> % nivel, 0, 56, 1)</pre></div>
+      <div class="hints"><details><summary>Pista 1</summary><p>Si el porcentaje es 100, el nivel debe ser 10.</p></details><details><summary>Pista 2</summary><p>Es la misma regla de tres del paso 4, pero hacia 10 en vez de hacia 100.</p></details><details><summary>Pista 3</summary><p>La línea 56 queda debajo de la barra; si se pisa con algo, cambia la y.</p></details></div>
+      <p class="check"><strong>Comprueba:</strong> con la perilla al mínimo dice 0 y al máximo dice 10. ¿En qué porcentaje pasa de 4 a 5?</p>
+      <label class="ex-done"><input type="checkbox" id="sensor-3"><span>¡Lo logré!</span></label>
+    </li>
+
+    <li class="blk pro">
+      <span class="kchip k-pro">Profundización · Analógica + digital</span>
+      <h3>Sensor 4 · Fotorresistencia, luz de luna</h3>
+      <p>La fotorresistencia (LDR) cambia con la luz. Este módulo da <strong>dos señales</strong>: <strong>AO</strong>, analógica, dice <em>cuánta</em> luz hay; <strong>DO</strong>, digital, dice solo si está oscuro, comparando con un <strong>umbral</strong> que trae el propio módulo.</p>
+      <div class="chip-conn"><svg class="mini-svg" viewBox="0 0 480 176" role="img" aria-label="LDR: VCC a 3V3, GND, AO al 35 y DO al 27"><rect x="10" y="10" width="140" height="156" rx="8" class="pcb"/><text x="24" y="92" class="lbl">ESP32</text><rect x="330" y="10" width="140" height="156" rx="8" class="pcb"/><text x="456" y="92" class="lbl" text-anchor="end">LDR</text><line x1="150" y1="36" x2="330" y2="36" stroke="var(--w-vcc)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="36" r="6" class="pin"/><text x="140" y="40" class="lbl-sm" text-anchor="end">3V3</text><circle cx="330" cy="36" r="6" class="pin"/><text x="340" y="40" class="lbl-sm">VCC</text><line x1="150" y1="70" x2="330" y2="70" stroke="var(--w-gnd)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="70" r="6" class="pin"/><text x="140" y="74" class="lbl-sm" text-anchor="end">GND</text><circle cx="330" cy="70" r="6" class="pin"/><text x="340" y="74" class="lbl-sm">GND</text><line x1="150" y1="104" x2="330" y2="104" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="104" r="6" class="pin"/><text x="140" y="108" class="lbl-sm" text-anchor="end">35</text><circle cx="330" cy="104" r="6" class="pin"/><text x="340" y="108" class="lbl-sm">AO</text><line x1="150" y1="138" x2="330" y2="138" stroke="var(--k-teo)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="138" r="6" class="pin"/><text x="140" y="142" class="lbl-sm" text-anchor="end">27</text><circle cx="330" cy="138" r="6" class="pin"/><text x="340" y="142" class="lbl-sm">DO</text></svg><div><ul class="wiring"><li><span class="sw-dot" style="background:var(--w-vcc)"></span>VCC → <b>3V3</b></li><li><span class="sw-dot" style="background:var(--w-gnd)"></span>GND → <b>GND</b></li><li><span class="sw-dot" style="background:var(--accent)"></span>AO → <b>35</b></li><li><span class="sw-dot" style="background:var(--k-teo)"></span>DO → <b>27</b></li></ul></div></div><p class="note">La OLED va conectada como siempre (21, 22, 3V3 y GND) para mostrar los valores.</p>
+      <h4 class="ch4">Configurar la lectura, paso a paso</h4>
+      <ol class="csteps"><li><div class="cstep-n">1</div><div class="cstep-b"><h4>AO como analógica</h4><p>Igual que el potenciómetro, pero en el 35.</p><div class="code"><span class="lang">python</span><pre>ao = ADC(Pin(35))
+ao.atten(ADC.ATTN_11DB)</pre></div></div></li><li><div class="cstep-n">2</div><div class="cstep-b"><h4>DO como digital</h4><p>Igual que un botón, sin PULL_UP: el módulo da su propio 0 o 1.</p><div class="code"><span class="lang">python</span><pre>do = Pin(27, Pin.IN)</pre></div></div></li><li><div class="cstep-n">3</div><div class="cstep-b"><h4>Leer las dos</h4><p>Ojo: aquí <strong>más luz da un número más bajo</strong>. Y DO vale 1 cuando está oscuro.</p><div class="code"><span class="lang">python</span><pre>crudo = ao.read_u16()
+oscuro = do.value() == 1</pre></div></div></li></ol>
+      <details class="full"><summary>Ver el archivo completo: <code>sensores/4-luz/luz_de_luna.py</code></summary><div class="code"><span class="lang">python · luz_de_luna.py</span><button class="copy" type="button">Copiar</button><pre><span class="c-com"># Sensor 4 · Fotorresistencia (LDR): luz de luna.</span>
+<span class="c-com"># Da DOS señales: AO es analógica (cuánta luz) y DO es digital (¿está oscuro?).</span>
+<span class="c-kw">from</span> machine <span class="c-kw">import</span> ADC
+<span class="c-kw">import</span> time
+<span class="c-kw">from</span> machine <span class="c-kw">import</span> Pin, I2C
+<span class="c-kw">import</span> ssd1306
+
+
+<span class="c-kw">def</span> preparar_pantalla():
+    i2c = I2C(0, scl=Pin(22), sda=Pin(21), freq=400000)
+    <span class="c-kw">return</span> ssd1306.SSD1306_I2C(128, 64, i2c)
+
+
+<span class="c-kw">def</span> preparar_sensor():
+    ao = ADC(Pin(35))
+    ao.atten(ADC.ATTN_11DB)
+    do = Pin(27, Pin.IN)
+    <span class="c-kw">return</span> ao, do
+
+
+<span class="c-kw">def</span> mostrar(display, crudo, oscuro):
+    display.fill(0)
+    display.text(<span class="c-str">"Luz de luna"</span>, 20, 0, 1)
+    display.text(<span class="c-str">"AO: %d"</span> % crudo, 0, 20, 1)
+    <span class="c-kw">if</span> oscuro:
+        display.text(<span class="c-str">"Noche: salen"</span>, 0, 40, 1)
+        display.text(<span class="c-str">"los vampiros"</span>, 0, 52, 1)
+    <span class="c-kw">else</span>:
+        display.text(<span class="c-str">"Dia: a salvo"</span>, 0, 40, 1)
+    display.show()
+
+
+<span class="c-kw">def</span> main():
+    display = preparar_pantalla()
+    ao, do = preparar_sensor()
+    <span class="c-kw">for</span> vuelta <span class="c-kw">in</span> range(300):
+        crudo = ao.read_u16()  <span class="c-com"># mucha luz = número bajo, poca luz = número alto</span>
+        oscuro = do.value() == 1  <span class="c-com"># DO se pone en 1 cuando está oscuro</span>
+        mostrar(display, crudo, oscuro)  <span class="c-com"># breakpoint aquí</span>
+        time.sleep_ms(200)
+
+
+<span class="c-kw">if</span> __name__ == <span class="c-str">"__main__"</span>:
+    main()</pre></div></details>
+      <div class="runbox"><b>Para probarlo:</b> en Wokwi, <strong>Select Config File</strong> → <code>sensores/4-luz/wokwi.toml</code> y <strong>Start Simulation</strong>. Luego elige <strong>Sensor 4 · Luz de luna (LDR) — REMOTA GHI</strong>. Para cambiar la luz, edita <code>lux</code> en <code>diagram.json</code> (por ejemplo 5 para noche, 1000 para día) y vuelve a iniciar.</div>
+    </li>
+    <li class="blk pra">
+      <span class="kchip k-pra">Práctica · Sensor 4</span>
+      <h3>Tu propio umbral</h3>
+      <p>En vez de usar DO, decide tú cuándo es de noche usando AO:</p>
+      <div class="code"><span class="lang">python · luz_de_luna.py</span><button class="copy" type="button">Copiar</button><pre>        oscuro = crudo &gt; <span class="blank">___</span></pre></div>
+      <div class="hints"><details><summary>Pista 1</summary><p>Pon un breakpoint en <code>mostrar(...)</code> y apunta <code>crudo</code> con lux 5 y con lux 1000.</p></details><details><summary>Pista 2</summary><p>Elige un número entre esos dos.</p></details><details><summary>Pista 3</summary><p>Recuerda: oscuro = número alto.</p></details></div>
+      <p class="check"><strong>Comprueba:</strong> con poca luz dice «Noche» y con mucha «Dia». ¿Tu umbral y el de DO cambian en el mismo lux?</p>
+      <label class="ex-done"><input type="checkbox" id="sensor-4"><span>¡Lo logré!</span></label>
+    </li>
+
+    <li class="blk con">
+      <span class="kchip k-con">Concepto nuevo · Pulsos</span>
+      <h3>Sensor 5 · Ultrasonido HC-SR04, el radar de vampiros</h3>
+      <p>Funciona como un murciélago: lanza un sonido que no oímos, el sonido rebota y vuelve. El sensor pone <strong>ECHO</strong> en 1 todo el tiempo que tarda el viaje. Cuanto más dura, más lejos está el objeto.</p>
+      <div class="chip-conn"><svg class="mini-svg" viewBox="0 0 480 176" role="img" aria-label="HC-SR04: VCC a 5V, GND, TRIG al 32 y ECHO al 33"><rect x="10" y="10" width="140" height="156" rx="8" class="pcb"/><text x="24" y="92" class="lbl">ESP32</text><rect x="330" y="10" width="140" height="156" rx="8" class="pcb"/><text x="456" y="92" class="lbl" text-anchor="end">HC-SR04</text><line x1="150" y1="36" x2="330" y2="36" stroke="var(--w-vcc)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="36" r="6" class="pin"/><text x="140" y="40" class="lbl-sm" text-anchor="end">5V</text><circle cx="330" cy="36" r="6" class="pin"/><text x="340" y="40" class="lbl-sm">VCC</text><line x1="150" y1="70" x2="330" y2="70" stroke="var(--w-gnd)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="70" r="6" class="pin"/><text x="140" y="74" class="lbl-sm" text-anchor="end">GND</text><circle cx="330" cy="70" r="6" class="pin"/><text x="340" y="74" class="lbl-sm">GND</text><line x1="150" y1="104" x2="330" y2="104" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="104" r="6" class="pin"/><text x="140" y="108" class="lbl-sm" text-anchor="end">32</text><circle cx="330" cy="104" r="6" class="pin"/><text x="340" y="108" class="lbl-sm">TRIG</text><line x1="150" y1="138" x2="330" y2="138" stroke="var(--k-teo)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="138" r="6" class="pin"/><text x="140" y="142" class="lbl-sm" text-anchor="end">33</text><circle cx="330" cy="138" r="6" class="pin"/><text x="340" y="142" class="lbl-sm">ECHO</text></svg><div><ul class="wiring"><li><span class="sw-dot" style="background:var(--w-vcc)"></span>VCC → <b>5V</b></li><li><span class="sw-dot" style="background:var(--w-gnd)"></span>GND → <b>GND</b></li><li><span class="sw-dot" style="background:var(--accent)"></span>TRIG → <b>32</b></li><li><span class="sw-dot" style="background:var(--k-teo)"></span>ECHO → <b>33</b></li></ul><p class="note">Con una placa real, ECHO da 5 V: necesita un divisor de voltaje antes de llegar al ESP32. En Wokwi no hace falta.</p></div></div><p class="note">La OLED va conectada como siempre (21, 22, 3V3 y GND) para mostrar los valores.</p>
+      <h4 class="ch4">Configurar la lectura, paso a paso</h4>
+      <ol class="csteps"><li><div class="cstep-n">1</div><div class="cstep-b"><h4>Preparar los dos pines</h4><p>TRIG es una salida (el ESP32 dispara); ECHO, una entrada (el sensor responde).</p><div class="code"><span class="lang">python</span><pre>trig = Pin(32, Pin.OUT, value=0)
+echo = Pin(33, Pin.IN)</pre></div></div></li><li><div class="cstep-n">2</div><div class="cstep-b"><h4>Disparar</h4><p>Un pulso de 10 microsegundos en TRIG le dice al sensor «mide».</p><div class="code"><span class="lang">python</span><pre>trig.value(1)
+time.sleep_us(10)
+trig.value(0)</pre></div></div></li><li><div class="cstep-n">3</div><div class="cstep-b"><h4>Medir cuánto dura ECHO</h4><p><code>time_pulse_us</code> espera a que ECHO se ponga en 1 y cuenta los microsegundos hasta que vuelve a 0. Si pasan 30 000 µs sin eco, devuelve un número negativo.</p><div class="code"><span class="lang">python</span><pre>duracion = time_pulse_us(echo, 1, 30000)</pre></div></div></li><li><div class="cstep-n">4</div><div class="cstep-b"><h4>Pasar a centímetros</h4><p>El sonido tarda unos 29 µs por centímetro, y hace el camino dos veces (ida y vuelta): 58 µs por cada centímetro de distancia.</p><div class="code"><span class="lang">python</span><pre>cm = duracion / 58</pre></div></div></li></ol>
+      <details class="full"><summary>Ver el archivo completo: <code>sensores/5-ultrasonido/radar.py</code></summary><div class="code"><span class="lang">python · radar.py</span><button class="copy" type="button">Copiar</button><pre><span class="c-com"># Sensor 5 · HC-SR04: el radar de vampiros.</span>
+<span class="c-com"># Señal de PULSOS: la distancia se mide por cuánto dura un pulso en ECHO.</span>
+<span class="c-kw">from</span> machine <span class="c-kw">import</span> time_pulse_us
+<span class="c-kw">import</span> time
+<span class="c-kw">from</span> machine <span class="c-kw">import</span> Pin, I2C
+<span class="c-kw">import</span> ssd1306
+
+
+<span class="c-kw">def</span> preparar_pantalla():
+    i2c = I2C(0, scl=Pin(22), sda=Pin(21), freq=400000)
+    <span class="c-kw">return</span> ssd1306.SSD1306_I2C(128, 64, i2c)
+
+
+<span class="c-kw">def</span> preparar_radar():
+    trig = Pin(32, Pin.OUT, value=0)
+    echo = Pin(33, Pin.IN)
+    <span class="c-kw">return</span> trig, echo
+
+
+<span class="c-kw">def</span> medir_cm(trig, echo):
+    trig.value(1)       <span class="c-com"># 1. un disparo de 10 microsegundos</span>
+    time.sleep_us(10)
+    trig.value(0)
+    duracion = time_pulse_us(echo, 1, 30000)  <span class="c-com"># 2. cuánto dura ECHO en 1</span>
+    <span class="c-kw">if</span> duracion &lt; 0:
+        <span class="c-kw">return</span> -1        <span class="c-com"># no volvió el eco</span>
+    <span class="c-kw">return</span> duracion / 58  <span class="c-com"># 3. el sonido va y vuelve: 58 µs por centímetro</span>
+
+
+<span class="c-kw">def</span> mostrar(display, cm):
+    display.fill(0)
+    display.text(<span class="c-str">"Radar"</span>, 44, 0, 1)
+    <span class="c-kw">if</span> cm &lt; 0:
+        display.text(<span class="c-str">"Sin eco"</span>, 36, 28, 1)
+    <span class="c-kw">else</span>:
+        display.text(<span class="c-str">"%d cm"</span> % int(cm), 44, 28, 1)
+        <span class="c-kw">if</span> cm &lt; 50:
+            display.text(<span class="c-str">"Vampiro cerca!"</span>, 8, 48, 1)
+    display.show()
+
+
+<span class="c-kw">def</span> main():
+    display = preparar_pantalla()
+    trig, echo = preparar_radar()
+    <span class="c-kw">for</span> vuelta <span class="c-kw">in</span> range(300):
+        cm = medir_cm(trig, echo)
+        mostrar(display, cm)  <span class="c-com"># breakpoint aquí</span>
+        time.sleep_ms(200)
+
+
+<span class="c-kw">if</span> __name__ == <span class="c-str">"__main__"</span>:
+    main()</pre></div></details>
+      <div class="runbox"><b>Para probarlo:</b> en Wokwi, <strong>Select Config File</strong> → <code>sensores/5-ultrasonido/wokwi.toml</code> y <strong>Start Simulation</strong>. Luego elige <strong>Sensor 5 · Radar HC-SR04 — REMOTA GHI</strong>. Haz clic en el sensor y mueve la barra de distancia.</div>
+    </li>
+    <li class="blk pra">
+      <span class="kchip k-pra">Práctica · Sensor 5</span>
+      <h3>Dos niveles de alarma</h3>
+      <p>En <code>mostrar</code>, cambia la alarma para que tenga dos niveles:</p>
+      <div class="code"><span class="lang">python · radar.py</span><button class="copy" type="button">Copiar</button><pre>        <span class="c-kw">if</span> cm &lt; <span class="blank">___</span>:
+            display.text(<span class="c-str">"Te muerde!"</span>, 24, 48, 1)
+        <span class="c-kw">elif</span> cm &lt; 50:
+            display.text(<span class="c-str">"Vampiro cerca!"</span>, 8, 48, 1)</pre></div>
+      <div class="hints"><details><summary>Pista 1</summary><p>El nivel más peligroso va primero: si estuviera segundo, nunca se mostraría. ¿Por qué?</p></details><details><summary>Pista 2</summary><p>Elige una distancia menor que 50, por ejemplo 20.</p></details></div>
+      <p class="check"><strong>Comprueba:</strong> a 100 cm no sale nada, a 40 «Vampiro cerca!» y a 10 «Te muerde!». Antes de probar, predice: con <code>duracion = 1160</code>, ¿cuántos cm salen?</p>
+      <label class="ex-done"><input type="checkbox" id="sensor-5"><span>¡Lo logré!</span></label>
+    </li>
+
+    <li class="blk con">
+      <span class="kchip k-con">Concepto nuevo · Bus 1-Wire</span>
+      <h3>Sensor 6 · DS18B20, el termómetro del caldero</h3>
+      <p>El DS18B20 mide temperatura por un <strong>bus 1-Wire</strong>: un solo cable de datos donde pueden colgar muchos sensores. Cada uno tiene un número de serie único de fábrica (<strong>ROM</strong>), así que el ESP32 sabe a cuál le pregunta.</p>
+      <div class="chip-conn"><svg class="mini-svg" viewBox="0 0 480 142" role="img" aria-label="DS18B20: VCC a 3V3, GND y DQ al pin 4"><rect x="10" y="10" width="140" height="122" rx="8" class="pcb"/><text x="24" y="75" class="lbl">ESP32</text><rect x="330" y="10" width="140" height="122" rx="8" class="pcb"/><text x="456" y="75" class="lbl" text-anchor="end">DS18B20</text><line x1="150" y1="36" x2="330" y2="36" stroke="var(--w-vcc)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="36" r="6" class="pin"/><text x="140" y="40" class="lbl-sm" text-anchor="end">3V3</text><circle cx="330" cy="36" r="6" class="pin"/><text x="340" y="40" class="lbl-sm">VCC</text><line x1="150" y1="70" x2="330" y2="70" stroke="var(--w-gnd)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="70" r="6" class="pin"/><text x="140" y="74" class="lbl-sm" text-anchor="end">GND</text><circle cx="330" cy="70" r="6" class="pin"/><text x="340" y="74" class="lbl-sm">GND</text><line x1="150" y1="104" x2="330" y2="104" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="104" r="6" class="pin"/><text x="140" y="108" class="lbl-sm" text-anchor="end">4</text><circle cx="330" cy="104" r="6" class="pin"/><text x="340" y="108" class="lbl-sm">DQ (datos)</text></svg><div><ul class="wiring"><li><span class="sw-dot" style="background:var(--w-vcc)"></span>VCC → <b>3V3</b></li><li><span class="sw-dot" style="background:var(--w-gnd)"></span>GND → <b>GND</b></li><li><span class="sw-dot" style="background:var(--accent)"></span>DQ (datos) → <b>4</b></li></ul><p class="note">Lleva además una resistencia de 4,7 kΩ entre DQ y 3V3 (resistencia de pull-up). El bus la necesita para volver a 1 cuando nadie habla.</p></div></div><p class="note">La OLED va conectada como siempre (21, 22, 3V3 y GND) para mostrar los valores.</p>
+      <h4 class="ch4">Configurar la lectura, paso a paso</h4>
+      <ol class="csteps"><li><div class="cstep-n">1</div><div class="cstep-b"><h4>Crear el bus en su pin</h4><p>Primero el bus, luego el «idioma» del DS18B20 encima.</p><div class="code"><span class="lang">python</span><pre>bus = onewire.OneWire(Pin(4))
+sensores = ds18x20.DS18X20(bus)</pre></div></div></li><li><div class="cstep-n">2</div><div class="cstep-b"><h4>Buscar sensores</h4><p><code>scan()</code> devuelve la ROM de cada sensor conectado. Con uno, la lista tiene un elemento.</p><div class="code"><span class="lang">python</span><pre>roms = sensores.scan()
+print(len(roms))   <span class="c-com"># 1</span></pre></div></div></li><li><div class="cstep-n">3</div><div class="cstep-b"><h4>Pedir la medida y esperar</h4><p>La orden llega a todos los sensores del bus a la vez. Tardan hasta 750 ms.</p><div class="code"><span class="lang">python</span><pre>sensores.convert_temp()
+time.sleep_ms(750)</pre></div></div></li><li><div class="cstep-n">4</div><div class="cstep-b"><h4>Leer a uno en concreto</h4><p>Aquí se usa la ROM: «tú, el primero, dime tu temperatura».</p><div class="code"><span class="lang">python</span><pre>temperatura = sensores.read_temp(roms[0])</pre></div></div></li></ol>
+      <details class="full"><summary>Ver el archivo completo: <code>sensores/6-ds18b20/caldero_termico.py</code></summary><div class="code"><span class="lang">python · caldero_termico.py</span><button class="copy" type="button">Copiar</button><pre><span class="c-com"># Sensor 6 · DS18B20: el termómetro del caldero.</span>
+<span class="c-com"># BUS 1-Wire: un solo cable de datos donde pueden colgar varios sensores,</span>
+<span class="c-com"># cada uno con un número de serie único (su ROM).</span>
+<span class="c-kw">import</span> onewire
+<span class="c-kw">import</span> ds18x20
+<span class="c-kw">import</span> time
+<span class="c-kw">from</span> machine <span class="c-kw">import</span> Pin, I2C
+<span class="c-kw">import</span> ssd1306
+
+
+<span class="c-kw">def</span> preparar_pantalla():
+    i2c = I2C(0, scl=Pin(22), sda=Pin(21), freq=400000)
+    <span class="c-kw">return</span> ssd1306.SSD1306_I2C(128, 64, i2c)
+
+
+<span class="c-kw">def</span> preparar_sensores():
+    bus = onewire.OneWire(Pin(4))
+    sensores = ds18x20.DS18X20(bus)
+    roms = sensores.scan()  <span class="c-com"># lista con el número de serie de cada sensor</span>
+    <span class="c-kw">return</span> sensores, roms
+
+
+<span class="c-kw">def</span> leer(sensores, rom):
+    sensores.convert_temp()  <span class="c-com"># orden: «midan la temperatura»</span>
+    time.sleep_ms(750)       <span class="c-com"># el DS18B20 tarda hasta 750 ms en medir</span>
+    <span class="c-kw">return</span> sensores.read_temp(rom)
+
+
+<span class="c-kw">def</span> mostrar(display, temperatura):
+    display.fill(0)
+    display.text(<span class="c-str">"Caldero"</span>, 36, 0, 1)
+    display.text(<span class="c-str">"%.1f C"</span> % temperatura, 40, 28, 1)
+    <span class="c-kw">if</span> temperatura &gt;= 100:
+        display.text(<span class="c-str">"Hierve!"</span>, 36, 48, 1)
+    display.show()
+
+
+<span class="c-kw">def</span> main():
+    display = preparar_pantalla()
+    sensores, roms = preparar_sensores()
+    print(<span class="c-str">"Sensores encontrados:"</span>, len(roms))
+    <span class="c-kw">for</span> rom <span class="c-kw">in</span> roms:
+        print(<span class="c-str">"  ROM:"</span>, rom.hex())
+    <span class="c-kw">if</span> <span class="c-kw">not</span> roms:
+        display.fill(0)
+        display.text(<span class="c-str">"Sin sensor"</span>, 24, 28, 1)
+        display.show()
+        <span class="c-kw">return</span>
+    <span class="c-kw">for</span> vuelta <span class="c-kw">in</span> range(60):
+        temperatura = leer(sensores, roms[0])
+        mostrar(display, temperatura)  <span class="c-com"># breakpoint aquí</span>
+
+
+<span class="c-kw">if</span> __name__ == <span class="c-str">"__main__"</span>:
+    main()</pre></div></details>
+      <div class="runbox"><b>Para probarlo:</b> en Wokwi, <strong>Select Config File</strong> → <code>sensores/6-ds18b20/wokwi.toml</code> y <strong>Start Simulation</strong>. Luego elige <strong>Sensor 6 · DS18B20 caldero — REMOTA GHI</strong>. Haz clic en el sensor y mueve la barra de temperatura.</div>
+    </li>
+    <li class="blk pra">
+      <span class="kchip k-pra">Práctica · Sensor 6</span>
+      <h3>Grados del otro lado del océano</h3>
+      <p>Muestra también la temperatura en grados Fahrenheit, como en Estados Unidos:</p>
+      <div class="code"><span class="lang">python · caldero_termico.py</span><button class="copy" type="button">Copiar</button><pre>    fahrenheit = temperatura * <span class="blank">___</span> / 5 + 32
+    display.text(<span class="c-str">"%.1f F"</span> % fahrenheit, 40, 40, 1)</pre></div>
+      <div class="hints"><details><summary>Pista 1</summary><p>La fórmula es F = C × 9 ÷ 5 + 32.</p></details><details><summary>Pista 2</summary><p>Comprueba con un dato conocido: 100 °C son 212 °F.</p></details><details><summary>Pista 3</summary><p>Si «Hierve!» y la nueva línea se pisan, mueve una de las dos.</p></details></div>
+      <p class="check"><strong>Comprueba:</strong> a 0 °C sale 32 F y a 100 °C sale 212 F. Mira en el monitor serie la ROM: ¿qué número sale? Compáralo con <code>deviceID</code> en <code>diagram.json</code>.</p>
+      <label class="ex-done"><input type="checkbox" id="sensor-6"><span>¡Lo logré!</span></label>
+    </li>
+
+    <li class="blk pra final">
+      <span class="kchip k-pra">Reto final de sensores</span>
+      <h3>El guardián de la cripta</h3>
+      <p>Con tu tutor, junta el PIR y el ultrasonido en un mismo circuito: cuando el PIR detecta movimiento, el radar mide a qué distancia está el visitante y la OLED avisa si está cerca. Antes de escribir código, haz la tabla de pines y comprueba en el <a href="#mapa-pines">mapa de pines</a> que no se repite ninguno.</p>
+      <label class="ex-done"><input type="checkbox" id="sensor-7"><span>¡Lo logré!</span></label>
+    </li>
+  </ol>
+  <p class="note">Estos circuitos y programas se probaron en el PC con sensores simulados, pero aún no en tu Wokwi. Si algo no responde, revisa primero los cables y avisa a tu tutor con el mensaje completo.</p>
+</section>
+
 <footer class="sources">
   <strong>Enlaces</strong>
   <ul>
-    <li>Archivos: <a href="https://github.com/Cassers/luka-wokwi-oled-debug">Cassers/luka-wokwi-oled-debug</a> · <a href="https://github.com/Cassers/luka-wokwi-oled-debug/tree/main/chips">carpeta chips</a> · <a href="https://github.com/Cassers/luka-wokwi-oled-debug/blob/main/MicroPython-debug/practica.py">practica.py</a> · <a href="https://github.com/Cassers/luka-wokwi-oled-debug/blob/main/MicroPython-debug/oled_demo.py">oled_demo.py</a>.</li>
+    <li>Archivos: <a href="https://github.com/Cassers/luka-wokwi-oled-debug">Cassers/luka-wokwi-oled-debug</a> · <a href="https://github.com/Cassers/luka-wokwi-oled-debug/tree/main/chips">carpeta chips</a> · <a href="https://github.com/Cassers/luka-wokwi-oled-debug/tree/main/sensores">carpeta sensores</a> · <a href="https://github.com/Cassers/luka-wokwi-oled-debug/blob/main/MicroPython-debug/practica.py">practica.py</a> · <a href="https://github.com/Cassers/luka-wokwi-oled-debug/blob/main/MicroPython-debug/oled_demo.py">oled_demo.py</a>.</li>
     <li><a href="https://docs.micropython.org/en/latest/library/framebuf.html">MicroPython: funciones de dibujo (framebuf)</a> · <a href="https://docs.wokwi.com/vscode/getting-started">Wokwi para VS Code</a>.</li>
     <li>La depuración remota GHI + Wokwi es experimental: si algo raro pasa, avisa a tu tutor con el mensaje completo.</li>
   </ul>
