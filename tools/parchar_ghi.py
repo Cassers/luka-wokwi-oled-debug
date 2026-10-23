@@ -17,6 +17,7 @@ Si la extensión no coincide exactamente con 0.2.2, no toca nada.
 
 import argparse
 import os
+import re
 from pathlib import Path
 import shutil
 import sys
@@ -55,18 +56,16 @@ RETRY_NEW = """        this.log(`Reopening UART on ${port}...`);
         }
 """
 
-TCP_ANCHOR = """    async open(path, baudRate = 115200) {
-        await new Promise((resolve, reject) => {
-"""
-TCP_NEW = """    async open(path, baudRate = 115200) {
-        await new Promise((resolve, reject) => {
-            // METIS-TCP-PATCH: debugPort "tcp://host:port" -> plain TCP socket
+TCP_OPEN = re.compile(
+    r"async open\((\w+)[^)]*\)\s*\{\s*await new Promise\(\((\w+),\s*(\w+)\)\s*=>\s*\{[ \t]*\r?\n")
+
+TCP_BODY = """            // METIS-TCP-PATCH: debugPort "tcp://host:port" -> plain TCP socket
             // (Wokwi RFC2217 bridge, tools/wokwi_debug_bridge_tcp.py).
-            if (/^tcp:\\/\\//i.test(path)) {
+            if (/^tcp:\\/\\//i.test(PATH)) {
                 const net = require("net");
-                const target = new URL(path);
+                const target = new URL(PATH);
                 const sock = net.connect({ host: target.hostname, port: Number(target.port) });
-                const port = new events_1.EventEmitter();
+                const port = new (require("events").EventEmitter)();
                 port.isOpen = false;
                 port.write = (data, cb) => sock.write(data, cb);
                 port.drain = (cb) => {
@@ -91,7 +90,7 @@ TCP_NEW = """    async open(path, baudRate = 115200) {
                 sock.on("data", (d) => this.onData(d));
                 sock.on("error", (e) => {
                     if (!port.isOpen) {
-                        reject(new Error(`Cannot connect to ${path}: ${e.message}. Is the Wokwi bridge task running?`));
+                        REJECT(new Error(`Cannot connect to ${PATH}: ${e.message}. Is the Wokwi bridge task running?`));
                     }
                     else {
                         this.emit("error", e);
@@ -106,15 +105,47 @@ TCP_NEW = """    async open(path, baudRate = 115200) {
                 sock.once("connect", () => {
                     port.isOpen = true;
                     this.port = port;
-                    resolve();
+                    RESOLVE();
                 });
                 return;
             }
 """
 
+
+def patch_retry(text):
+    anchor = RETRY_ANCHOR
+    if text.count(anchor) != 1:
+        return None, "no encontré la reapertura de launchUart"
+    return text.replace(anchor, RETRY_NEW), None
+
+
+def patch_tcp(text):
+    found = list(TCP_OPEN.finditer(text))
+    if len(found) != 1:
+        return None, "no encontré DeviceLink.open(...) con new Promise((resolve, reject) => {"
+    for needed in ("onData(", "this.port = ", 'this.emit("close")'):
+        if needed not in text:
+            return None, f"falta {needed!r} en el archivo"
+    m = found[0]
+    path, resolve, reject = m.group(1), m.group(2), m.group(3)
+    body = (TCP_BODY.replace("PATH", path).replace("RESOLVE", resolve)
+            .replace("REJECT", reject))
+    return text[:m.end()] + body + text[m.end():], None
+
+
+def context(text, needle, after=8):
+    lines = text.split("\n")
+    for i, line in enumerate(lines):
+        if needle in line:
+            first = max(0, i - 2)
+            return "\n".join(f"    {first + k + 1:5d}| {l}"
+                             for k, l in enumerate(lines[first: i + after]))
+    return f"    (no aparece {needle!r})"
+
+
 PATCHES = [
-    ("debugSession.js", MARK_RETRY, RETRY_ANCHOR, RETRY_NEW),
-    ("deviceLink.js", MARK_TCP, TCP_ANCHOR, TCP_NEW),
+    ("debugSession.js", MARK_RETRY, patch_retry, "Reopening UART"),
+    ("deviceLink.js", MARK_TCP, patch_tcp, "async open("),
 ]
 
 
@@ -142,15 +173,19 @@ def main():
     status = 0
     for out in outs:
         print(f"Extensión: {out}")
-        for name, mark, anchor, new in PATCHES:
+        for name, mark, apply, needle in PATCHES:
             path = out / name
             with open(path, encoding="utf-8", newline="") as f:
-                text = f.read()
-            if mark in text:
+                raw = f.read()
+            if mark in raw:
                 print(f"  {name}: ya ajustado")
                 continue
-            if text.replace("\r\n", "\n").count(anchor) != 1:
-                print(f"  {name}: versión distinta, no se toca (busca el bloque a mano)",
+            crlf = "\r\n" in raw
+            text = raw.replace("\r\n", "\n")
+            patched, why = apply(text)
+            if patched is None:
+                print(f"  {name}: versión distinta, no se toca ({why}).", file=sys.stderr)
+                print(f"  Fragmento para revisar (envíalo al profesor):\n{context(text, needle)}",
                       file=sys.stderr)
                 status = 1
                 continue
@@ -163,8 +198,8 @@ def main():
             if not backup.exists():
                 shutil.copy2(path, backup)
                 print(f"  copia original: {backup}")
-            crlf = "\r\n" in text
-            patched = text.replace(anchor.replace("\n", "\r\n"), new.replace("\n", "\r\n")) if crlf else text.replace(anchor, new)
+            if crlf:
+                patched = patched.replace("\n", "\r\n")
             with open(path, "w", encoding="utf-8", newline="") as f:
                 f.write(patched)
             print(f"  {name}: ajuste aplicado")
