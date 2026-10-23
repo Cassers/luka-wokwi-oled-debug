@@ -56,12 +56,12 @@ RETRY_NEW = """        this.log(`Reopening UART on ${port}...`);
         }
 """
 
-TCP_OPEN = re.compile(
-    r"async open\((\w+)[^)]*\)\s*\{\s*await new Promise\(\((\w+),\s*(\w+)\)\s*=>\s*\{[ \t]*\r?\n")
+TCP_OPEN = re.compile(r"async open\((\w+)[^)]*\)\s*\{[ \t]*\r?\n")
 
-TCP_BODY = """            // METIS-TCP-PATCH: debugPort "tcp://host:port" -> plain TCP socket
-            // (Wokwi RFC2217 bridge, tools/wokwi_debug_bridge_tcp.py).
-            if (/^tcp:\\/\\//i.test(PATH)) {
+TCP_BODY = """        // METIS-TCP-PATCH: debugPort "tcp://host:port" -> plain TCP socket
+        // (Wokwi RFC2217 bridge, tools/wokwi_debug_bridge_tcp.py).
+        if (/^tcp:\\/\\//i.test(PATH)) {
+            await new Promise((RESOLVE, REJECT) => {
                 const net = require("net");
                 const target = new URL(PATH);
                 const sock = net.connect({ host: target.hostname, port: Number(target.port) });
@@ -107,8 +107,9 @@ TCP_BODY = """            // METIS-TCP-PATCH: debugPort "tcp://host:port" -> pla
                     this.port = port;
                     RESOLVE();
                 });
-                return;
-            }
+            });
+            return;
+        }
 """
 
 
@@ -120,16 +121,14 @@ def patch_retry(text):
 
 
 def patch_tcp(text):
-    found = list(TCP_OPEN.finditer(text))
-    if len(found) != 1:
-        return None, "no encontré DeviceLink.open(...) con new Promise((resolve, reject) => {"
+    cls = text.find("class DeviceLink")
+    m = TCP_OPEN.search(text, cls) if cls >= 0 else None
+    if m is None:
+        return None, "no encontré DeviceLink.open(...) dentro de class DeviceLink"
     for needed in ("onData(", "this.port = ", 'this.emit("close")'):
         if needed not in text:
             return None, f"falta {needed!r} en el archivo"
-    m = found[0]
-    path, resolve, reject = m.group(1), m.group(2), m.group(3)
-    body = (TCP_BODY.replace("PATH", path).replace("RESOLVE", resolve)
-            .replace("REJECT", reject))
+    body = TCP_BODY.replace("PATH", m.group(1)).replace("RESOLVE", "metisResolve").replace("REJECT", "metisReject")
     return text[:m.end()] + body + text[m.end():], None
 
 
