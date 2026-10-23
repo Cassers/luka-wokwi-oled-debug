@@ -6,6 +6,10 @@
             "type": "process",
             "command": "${workspaceFolder}/.venv/bin/python",
             "args": ["-B", "${workspaceFolder}/tools/wokwi_debug_bridge.py", "--ensure", "--recover-stale"],
+            "windows": {
+                "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+                "args": ["-B", "${workspaceFolder}\\tools\\wokwi_debug_bridge_tcp.py", "--ensure"]
+            },
             "options": { "cwd": "${workspaceFolder}" },
             "isBackground": true,
             "runOptions": { "instanceLimit": 1 },
@@ -32,6 +36,10 @@
             "type": "process",
             "command": "${workspaceFolder}/.venv/bin/python",
             "args": ["-B", "${workspaceFolder}/tools/wokwi_debug_bridge.py", "--check"],
+            "windows": {
+                "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+                "args": ["-B", "${workspaceFolder}\\tools\\wokwi_debug_bridge_tcp.py", "--check"]
+            },
             "options": { "cwd": "${workspaceFolder}" },
             "problemMatcher": [],
             "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }

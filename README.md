@@ -5,6 +5,10 @@ Demo de diagnóstico para Luka: pausar MicroPython dentro de un ESP32 **simulado
 **Guía web (tutorial de uso, pines y ruta de práctica):** https://cassers.github.io/luka-wokwi-oled-debug/
 Instalación inicial (para la IA tutora): [MicroPython-debug/GUIA-BOT-LUKA.md](MicroPython-debug/GUIA-BOT-LUKA.md).
 
+## Windows
+
+Funciona con el puente TCP (sin drivers): crea `.venv` con pyserial, descarga el firmware GHI, ejecuta `.venv\Scripts\python tools\parchar_ghi.py` y recarga VS Code. Pasos exactos en la sección «Windows: preparación» de [GUIA-BOT-LUKA.md](MicroPython-debug/GUIA-BOT-LUKA.md). Las tareas y perfiles eligen solos la variante de Windows.
+
 ## Obtener los archivos
 
 ```sh
@@ -21,6 +25,8 @@ Sin git: botón **Code → Download ZIP** y abrir en VS Code la carpeta descompr
 .vscode/launch.json   perfiles de depuración remota GHI
 .vscode/tasks.json    tareas que arrancan y comprueban el puente
 tools/wokwi_debug_bridge.py   puente RFC2217 → PTY (Linux)
+tools/wokwi_debug_bridge_tcp.py   puente RFC2217 → TCP (Windows, sin drivers)
+tools/parchar_ghi.py  aplica los ajustes locales a la extensión GHI 0.2.2
 MicroPython-debug/    demo OLED, practica.py (ejercicios), controlador ssd1306, circuito Wokwi y guía
 chips/                4 circuitos extra: DHT22, MPU6050 (I2C), MAX7219 (SPI), UART
 sensores/             6 sensores por tipo de señal: botón, PIR, potenciómetro, LDR, HC-SR04, DS18B20

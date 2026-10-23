@@ -21,8 +21,8 @@ El comentario histórico de `oled_demo.py` que dice «aún no confirmada» prece
 
 Pregunta SO, arquitectura, versión de VS Code, shell, carpeta abierta y perfil activo de extensiones.
 Confirma si dispone de Python para el puente, extensión Wokwi y permiso para ejecutar tareas del proyecto.
-El puente actual usa PTY Linux y `/proc`; Windows/macOS requieren adaptación, no basta cambiar una ruta.
-Si el equipo no es Linux, documentar esa diferencia y acordar adaptación antes de presentar este procedimiento como reproducible.
+En **Linux** se usa el puente PTY (`tools/wokwi_debug_bridge.py`) y los Pasos 3 a 6 tal cual.
+En **Windows** se usa el puente TCP sin drivers (`tools/wokwi_debug_bridge_tcp.py`): sigue la sección **«Windows: preparación»** al final y vuelve al Paso 7. Las tareas y perfiles ya eligen solos la variante de Windows.
 **Pide confirmación:** «¿Qué sistema y versión tienes, y qué carpeta está abierta?».
 
 ## Paso 2 · Transferir los archivos y abrir la raíz
@@ -186,6 +186,48 @@ No basta ver Variables: la combinación de adaptador remoto, pila y pantalla dis
 Al terminar, detén la depuración y la tarea del puente antes de detener Wokwi. El almacenamiento simulado es volátil; GHI resincroniza al lanzar.
 Fallback opcional: seleccionar `MicroPython/wokwi.toml` y seguir la guía normal `MicroPython/GUIA-AGENTE-LUKA.md` (no incluida en este repositorio; pedirla al profesor), con su firmware y carga `mpremote`, después de liberar el puente.
 La enseñanza sigue por pistas: funciones, variables, bucles y predicción; este éxito no autoriza generar lógica de robots.
+
+## Windows: preparación (reemplaza los Pasos 3, 5 y 6)
+
+Probado en Linux con un servidor RFC2217 de prueba y la extensión GHI ajustada; **aún sin prueba completa en Windows**: registra cualquier diferencia.
+Todo se hace en una terminal PowerShell de VS Code, parada en la raíz del repositorio.
+
+1. **Python:** `py --version` debe mostrar Python 3.10 o superior. Si no existe, instálalo desde python.org marcando «Add python.exe to PATH».
+2. **Entorno del puente:**
+
+```powershell
+py -m venv .venv
+.venv\Scripts\python -m pip install pyserial==3.5
+```
+
+3. **Firmware GHI** (mismo archivo y MD5 del Paso 5):
+
+```powershell
+New-Item -ItemType Directory -Force .tools\ghi-debug
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ghi-electronics/micropython-vsc-extension/main/docs/firmware/micropython-esp32-generic-uart0-v1.29.0-16-g201fc48cf9.bin" -OutFile ".tools\ghi-debug\micropython-esp32-generic-uart0-v1.29.0-16-g201fc48cf9.bin"
+Get-FileHash -Algorithm MD5 .tools\ghi-debug\micropython-esp32-generic-uart0-v1.29.0-16-g201fc48cf9.bin
+```
+
+   El hash debe ser `0039EDD36E557B0BD1F5DB20CDF97502`.
+4. **Ajustes de GHI 0.2.2** (con la extensión ya instalada, Paso 4, y sin depurar): aplica el reintento del Paso 6 y además deja que GHI se conecte por TCP.
+
+```powershell
+.venv\Scripts\python tools\parchar_ghi.py
+```
+
+   Debe decir «ajuste aplicado» (o «ya ajustado») para `debugSession.js` y `deviceLink.js`. Guarda copias originales en `.tools\ghi-debug\`. Luego **Ctrl+Shift+P → Developer: Reload Window**.
+5. Sigue con el **Paso 7**. Al pulsar F5, la tarea arranca `wokwi_debug_bridge_tcp.py`: debe mostrar `GHI debugPort: tcp://127.0.0.1:4001` y **Puente activo.** En Windows, los perfiles usan `debugPort = tcp://127.0.0.1:4001` automáticamente.
+
+| Síntoma en Windows | Acción |
+| --- | --- |
+| `Path to shell executable ...\.venv\bin\python does not exist` | El repositorio es anterior al soporte de Windows: `git pull`. |
+| `...\.venv\Scripts\python.exe does not exist` | Falta el paso 2 (entorno del puente). |
+| `firmware binary ... not found in workspace` | Falta el paso 3 (firmware). |
+| `Cannot connect to tcp://127.0.0.1:4001` | El puente no corre: la simulación debe estar iniciada antes de F5. |
+| `Cannot open tcp://127.0.0.1:4001` o error de puerto serie | Falta el ajuste TCP: paso 4 y Reload Window. |
+| `Puente no disponible: ... 4000` | Wokwi no está corriendo o hay dos simulaciones a la vez: deja solo una. |
+
+Alternativa con puerto COM virtual (com0com) no recomendada: su driver firmado es antiguo y puede ser bloqueado por Windows 11; el puente TCP no necesita drivers ni permisos de administrador.
 
 ## Fuentes y alcance
 

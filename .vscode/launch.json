@@ -11,6 +11,7 @@
             "stopOnEntry": true,
             "debugInterface": "uart",
             "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "windows": { "debugPort": "tcp://127.0.0.1:4001" },
             "debugBaud": 115200,
             "checkFirmwareUpdate": false
         },
@@ -24,6 +25,7 @@
             "stopOnEntry": true,
             "debugInterface": "uart",
             "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "windows": { "debugPort": "tcp://127.0.0.1:4001" },
             "debugBaud": 115200,
             "checkFirmwareUpdate": false
         },
@@ -37,6 +39,7 @@
             "stopOnEntry": true,
             "debugInterface": "uart",
             "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "windows": { "debugPort": "tcp://127.0.0.1:4001" },
             "debugBaud": 115200,
             "checkFirmwareUpdate": false
         },
@@ -50,6 +53,7 @@
             "stopOnEntry": true,
             "debugInterface": "uart",
             "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "windows": { "debugPort": "tcp://127.0.0.1:4001" },
             "debugBaud": 115200,
             "checkFirmwareUpdate": false
         },
@@ -63,6 +67,7 @@
             "stopOnEntry": true,
             "debugInterface": "uart",
             "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "windows": { "debugPort": "tcp://127.0.0.1:4001" },
             "debugBaud": 115200,
             "checkFirmwareUpdate": false
         },
@@ -76,6 +81,7 @@
             "stopOnEntry": true,
             "debugInterface": "uart",
             "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "windows": { "debugPort": "tcp://127.0.0.1:4001" },
             "debugBaud": 115200,
             "checkFirmwareUpdate": false
         },
@@ -89,6 +95,7 @@
             "stopOnEntry": true,
             "debugInterface": "uart",
             "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "windows": { "debugPort": "tcp://127.0.0.1:4001" },
             "debugBaud": 115200,
             "checkFirmwareUpdate": false
         },
@@ -102,6 +109,7 @@
             "stopOnEntry": true,
             "debugInterface": "uart",
             "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "windows": { "debugPort": "tcp://127.0.0.1:4001" },
             "debugBaud": 115200,
             "checkFirmwareUpdate": false
         },
@@ -115,6 +123,7 @@
             "stopOnEntry": true,
             "debugInterface": "uart",
             "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "windows": { "debugPort": "tcp://127.0.0.1:4001" },
             "debugBaud": 115200,
             "checkFirmwareUpdate": false
         },
@@ -128,6 +137,7 @@
             "stopOnEntry": true,
             "debugInterface": "uart",
             "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "windows": { "debugPort": "tcp://127.0.0.1:4001" },
             "debugBaud": 115200,
             "checkFirmwareUpdate": false
         },
@@ -141,6 +151,7 @@
             "stopOnEntry": true,
             "debugInterface": "uart",
             "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "windows": { "debugPort": "tcp://127.0.0.1:4001" },
             "debugBaud": 115200,
             "checkFirmwareUpdate": false
         },
@@ -154,6 +165,7 @@
             "stopOnEntry": true,
             "debugInterface": "uart",
             "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "windows": { "debugPort": "tcp://127.0.0.1:4001" },
             "debugBaud": 115200,
             "checkFirmwareUpdate": false
         },
@@ -167,6 +179,7 @@
             "stopOnEntry": true,
             "debugInterface": "uart",
             "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "windows": { "debugPort": "tcp://127.0.0.1:4001" },
             "debugBaud": 115200,
             "checkFirmwareUpdate": false
         },
@@ -180,6 +193,7 @@
             "stopOnEntry": true,
             "debugInterface": "uart",
             "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "windows": { "debugPort": "tcp://127.0.0.1:4001" },
             "debugBaud": 115200,
             "checkFirmwareUpdate": false
         },
@@ -193,6 +207,7 @@
             "stopOnEntry": true,
             "debugInterface": "uart",
             "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "windows": { "debugPort": "tcp://127.0.0.1:4001" },
             "debugBaud": 115200,
             "checkFirmwareUpdate": false
         },
@@ -206,6 +221,7 @@
             "stopOnEntry": true,
             "debugInterface": "uart",
             "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "windows": { "debugPort": "tcp://127.0.0.1:4001" },
             "debugBaud": 115200,
             "checkFirmwareUpdate": false
         },
@@ -219,6 +235,7 @@
             "stopOnEntry": true,
             "debugInterface": "uart",
             "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "windows": { "debugPort": "tcp://127.0.0.1:4001" },
             "debugBaud": 115200,
             "checkFirmwareUpdate": false
         },
@@ -232,6 +249,7 @@
             "stopOnEntry": true,
             "debugInterface": "uart",
             "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "windows": { "debugPort": "tcp://127.0.0.1:4001" },
             "debugBaud": 115200,
             "checkFirmwareUpdate": false
         },
@@ -245,6 +263,7 @@
             "stopOnEntry": true,
             "debugInterface": "uart",
             "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "windows": { "debugPort": "tcp://127.0.0.1:4001" },
             "debugBaud": 115200,
             "checkFirmwareUpdate": false
         },
@@ -258,6 +277,7 @@
             "stopOnEntry": true,
             "debugInterface": "uart",
             "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "windows": { "debugPort": "tcp://127.0.0.1:4001" },
             "debugBaud": 115200,
             "checkFirmwareUpdate": false
         },
@@ -271,6 +291,7 @@
             "stopOnEntry": true,
             "debugInterface": "uart",
             "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "windows": { "debugPort": "tcp://127.0.0.1:4001" },
             "debugBaud": 115200,
             "checkFirmwareUpdate": false
         },
@@ -284,6 +305,7 @@
             "stopOnEntry": true,
             "debugInterface": "uart",
             "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "windows": { "debugPort": "tcp://127.0.0.1:4001" },
             "debugBaud": 115200,
             "checkFirmwareUpdate": false
         },
@@ -297,6 +319,7 @@
             "stopOnEntry": true,
             "debugInterface": "uart",
             "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "windows": { "debugPort": "tcp://127.0.0.1:4001" },
             "debugBaud": 115200,
             "checkFirmwareUpdate": false
         },
@@ -310,6 +333,7 @@
             "stopOnEntry": true,
             "debugInterface": "uart",
             "debugPort": "${workspaceFolder}/.tools/wokwi-ghi-uart",
+            "windows": { "debugPort": "tcp://127.0.0.1:4001" },
             "debugBaud": 115200,
             "checkFirmwareUpdate": false
         }
